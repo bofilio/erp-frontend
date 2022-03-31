@@ -5,6 +5,7 @@ export type endPointType = {
     methode: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
     application?: "couriers" | "gestion_access";
     model?: CouriesModels;
+    id?:string;
     url?: string
     params?: any,
     data?: any,

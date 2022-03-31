@@ -88,15 +88,11 @@ export class Apis implements IApis {
         }
     }
     async update_one(endpoint: endPointType): Promise<any> {
-        const { methode, application, model, data } = endpoint
-        if (methode !== "PATCH" && methode !== "PUT")
+        const { methode, application, model,params, data } = endpoint
+        if (methode !== "PUT")
             throw new Error("HTTP Method not supported!.");
         try {
-            const response = methode === "PATCH" ?
-                await axios.patch(`${baseURL}/${application}/${model}s/`, data,{
-                    headers: getHeaders(),
-                  }) :
-                await axios.put(`${baseURL}/${application}/${model}s/`, data,{
+            const response = await axios.put(`${baseURL}/${application}/${model}s/${params.id}/`, data,{
                     headers: getHeaders(),
                   })
             return response.data
