@@ -34,17 +34,21 @@ export const Layout: React.FC<{}> = (props) => {
             </Head>
             <LoadingTransaction />
             {
-                <Snackbar 
-                open={Boolean(alert?.message)} 
-                autoHideDuration={6000} 
-                onClose={() => setAlert({ status: "info", message: "" })}
-                anchorOrigin={{ vertical:"top", horizontal:"center" }}
+                <Snackbar
+                    open={Boolean(alert?.message)}
+                    autoHideDuration={6000}
+                    onClose={() => setAlert({ status: "info", message: "" })}
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
                 >
                     <Alert severity={alert?.status} onClose={() => setAlert({ status: "info", message: "" })}>{alert?.message}</Alert>
                 </Snackbar>
             }
-            {currentUser != null ?
+            {currentUser === null ?
 
+                <div>
+                    {children}
+                </div>
+                :
                 <Box sx={{ display: 'flex', paddingTop: 8 }}>
                     <CssBaseline />
                     <AppBar
@@ -101,10 +105,7 @@ export const Layout: React.FC<{}> = (props) => {
                         </MainContent>
                     </Box>
                 </Box>
-                :
-                <div>
-                    {children}
-                </div>
+
             }
 
 

@@ -1,1 +1,5 @@
 export * from "./AddUpdateExpediteurForm"
+export * from "./AddUpdateClassificationForm"
+export * from "./AddUpdateAttchmentForm"
+export * from "./AddUpdateTypeCourierForm"
+export * from "./AddUpdateStatutCourierForm"

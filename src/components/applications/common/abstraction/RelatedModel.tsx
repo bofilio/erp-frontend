@@ -1,4 +1,4 @@
-import { Autocomplete, IconButton, Stack, TextField } from '@mui/material'
+import { Autocomplete, Box, Button, DialogActions, DialogTitle, IconButton, Stack, TextField, Typography } from '@mui/material'
 import React, { useContext, useEffect, useState } from 'react'
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import AutoFixNormalOutlinedIcon from '@mui/icons-material/AutoFixNormalOutlined';
@@ -6,9 +6,10 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { API } from '../../../../DAL/generic';
 import { modelType } from '../../../../DAL/common/query';
 import { useQueryClient } from 'react-query';
-import { ModalProvider, MyModal, OpenModal } from '../../../../contexts/ModalContext';
+import { CloseModal, ModalProvider, MyModal, OpenModal } from '../../../../contexts/ModalContext';
 import { AlertContext } from '../../../../contexts';
 import { AddModelInstance, UpdateModelInstance } from './add_update_model';
+import { ConfirmeDeletion } from '../../../util';
 
 type RelatedModelProps = {
     formik: any;
@@ -95,7 +96,7 @@ export const RelatedModel: React.FC<RelatedModelProps> = (props) => {
                         {/**update instance */}
                         {value && !multiple &&
                             <>
-                            {/**update icon */}
+                                {/**update icon */}
                                 <ModalProvider>
                                     <OpenModal>
                                         <IconButton>
@@ -112,10 +113,12 @@ export const RelatedModel: React.FC<RelatedModelProps> = (props) => {
                                     </MyModal>
                                 </ModalProvider>
 
-                                {/**delete icon */}
-                                <IconButton onClick={() => deleteInstance(value?.id)}>
-                                    <HighlightOffIcon color='error' />
-                                </IconButton>
+                                {/**delete icon with confirmation context */}
+                                <ConfirmeDeletion doDelete={() => deleteInstance(value?.id)}>
+                                     <IconButton>
+                                            <HighlightOffIcon color='error' />
+                                        </IconButton>
+                                </ConfirmeDeletion>
                             </>
 
                         }

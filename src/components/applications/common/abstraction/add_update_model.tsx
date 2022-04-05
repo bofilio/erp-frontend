@@ -26,11 +26,11 @@ export const AddModelInstance: React.FC<AddUpdateModelProps> = (props) => {
         extra_headers:extra_headers,
     }), {
         onSuccess: () =>{
-            setAlert({status:"success", message:"le Rajout est fait"})
+            setAlert({status:"success", message:"sauvgardé"})
             onceDone()
         } ,
        onError:(err)=>{
-        setAlert({status:"error", message:`Erreur d'insertion ${err}`})
+        setAlert({status:"error", message:`Erreur de sauvgarde`})
        }
     }) 
 

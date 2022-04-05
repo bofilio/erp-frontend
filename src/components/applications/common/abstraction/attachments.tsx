@@ -1,21 +1,18 @@
-import { Avatar, Box, Button, Card, IconButton, List, ListItem, ListItemAvatar, ListItemText, Modal, Paper, Stack, styled, TextField, Typography } from '@mui/material'
+import { Avatar, Box, Button, Card, DialogActions, IconButton, ListItem, ListItemAvatar, ListItemText, Stack, Typography } from '@mui/material'
 import React, { useContext, useEffect, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useQuery, useQueryClient } from 'react-query'
 import { API } from '../../../../DAL/generic'
-import FolderIcon from '@mui/icons-material/Folder';
-import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { PlusOneOutlined } from '@mui/icons-material';
-import { ModalContext, ModalProvider, MyModal, OpenModal } from '../../../../contexts/ModalContext';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import { CloseModal, ModalContext, ModalProvider, MyModal, OpenModal } from '../../../../contexts/ModalContext';
 import AutoFixNormalOutlinedIcon from '@mui/icons-material/AutoFixNormalOutlined';
 import AttachmentIcon from '@mui/icons-material/Attachment';
 import FilePresentIcon from '@mui/icons-material/FilePresent';
 import { modelType } from '../../../../DAL/common/query';
 import { AddModelInstance, UpdateModelInstance } from './add_update_model';
 import { AddUpdateAttchmentForm } from '../../couriers/forms/AddUpdateAttchmentForm';
-
+import { AlertContext } from '../../../../contexts';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import { ConfirmeDeletion } from '../../../util';
 
 
 
@@ -26,7 +23,7 @@ type AttachmentProps = {
 
 export const Attachments = (props: AttachmentProps) => {
     const [queryHasChanged, setQueryHasChanged] = useState(false)
-
+    const { setAlert } = useContext(AlertContext)
     const { id_parent, model } = props
     const ATTACHMENTS_QUERY_KEYS = `${id_parent}_attchments`
     const queryClient = useQueryClient()
@@ -49,6 +46,9 @@ export const Attachments = (props: AttachmentProps) => {
             }
         }).then(res => {
             setQueryHasChanged(true)
+            setAlert({ status: "success", message: "fichier supprimé" })
+        }).catch(err => {
+            setAlert({ status: "error", message: "erreur de supprission" })
         })
     }
 
@@ -101,9 +101,14 @@ export const Attachments = (props: AttachmentProps) => {
                                                 </MyModal>
                                             </ModalProvider>
 
-                                            <IconButton edge="end" aria-label="delete" onClick={() => deleteAttachment(file.id)} >
-                                                <DeleteIcon color="error" />
-                                            </IconButton>
+
+                                            {/**delete ibuttun with confirmation context */}
+                                            <ConfirmeDeletion doDelete={() => deleteAttachment(file.id)}>
+                                                <IconButton>
+                                                    <HighlightOffIcon color='error' />
+                                                </IconButton>
+                                            </ConfirmeDeletion>
+
                                         </Stack>
                                     }
                                 >

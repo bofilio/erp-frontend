@@ -1,21 +1,20 @@
 import React, { useContext, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Autocomplete, Button, Checkbox, Divider, FormControlLabel, IconButton, MenuItem, Paper, Stack, TextField } from '@mui/material';
+import { Button, Checkbox, Divider, FormControlLabel, IconButton, MenuItem, Paper, Stack, TextField } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { DatePicker } from '@mui/lab';
-import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
-import AutoFixNormalOutlinedIcon from '@mui/icons-material/AutoFixNormalOutlined';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { API } from '../../DAL/generic';
 import { CourierType } from '../../DAL/couriers/types';
-import { AlertContext, LoadingContext } from '../../contexts';
+import { AlertContext } from '../../contexts';
 import SendIcon from '@mui/icons-material/Send';
 import { Attachments } from '../../components/applications/common/abstraction/attachments';
 import { getSelectedValue, getSelectedValues } from '../../helpers';
 import { RelatedModel } from '../../components/applications/common/abstraction/RelatedModel';
-import { AddUpdateExpediteurForm } from '../../components/applications/couriers/forms';
+import { AddUpdateClassificationForm, AddUpdateExpediteurForm, AddUpdateStatutCourierForm, AddUpdateTypeCourierForm } from '../../components/applications/couriers/forms';
 import moment from 'moment';
+import { ConfirmeDeletion } from '../../components/util';
 
 type operationType = "insert" | "update"
 
@@ -290,7 +289,7 @@ const index = () => {
                 value={getSelectedValue(types_couriers, formik.values?.type)}
                 getOptionLabel={(option) => option.name}
                 QUERY_KEYS={TYPES_COURIERS_QUERY_KEY}
-                InsertUpdateForm={<AddUpdateExpediteurForm />}
+                InsertUpdateForm={<AddUpdateTypeCourierForm />}
               />
 
             </Stack>
@@ -304,7 +303,7 @@ const index = () => {
               value={getSelectedValue(classifications, formik.values?.classification)}
               getOptionLabel={(option) => option.name}
               QUERY_KEYS={CLASSIFICATION_QUERY_KEY}
-              InsertUpdateForm={<AddUpdateExpediteurForm />}
+              InsertUpdateForm={<AddUpdateClassificationForm />}
             />
             {/** status courier (traitement) */}
             <RelatedModel
@@ -316,7 +315,7 @@ const index = () => {
               value={getSelectedValue(status, formik.values?.status)}
               getOptionLabel={(option) => option.name}
               QUERY_KEYS={STATUS_COURIER_QUERY_KEY}
-              InsertUpdateForm={<AddUpdateExpediteurForm />}
+              InsertUpdateForm={<AddUpdateStatutCourierForm />}
             />
 
             <FormControlLabel
@@ -373,7 +372,7 @@ const index = () => {
               multiple
               options={expediteurs}
               model="expediteur"
-              label="Visible à"
+              label="Visible pour"
               formik={formik}
               variableName="visible_a"
               value={getSelectedValues(expediteurs, formik.values?.visible_a)}
@@ -397,18 +396,24 @@ const index = () => {
                     <Button color="primary" variant="contained" endIcon={<SendIcon />} >
                       Envoyer par Mail
                     </Button>
+                    {/**delete ibuttun with confirmation context */}
 
-                    <Button color="error" variant="contained" onClick={() => deleteCouriers(formik.values?.id)}>
-                      Supprimer
-                    </Button>
                   </>
                 }
               </div>
               {formik.values?.id &&
-                <div>
-                  <Button color="info" variant="contained" onClick={() => resetForm()}>
-                    Nouveau
-                  </Button>
+                <div style={{ display: "flex", gap: "2rem" }}>
+                  <div>
+                    <Button color="info" variant="contained" onClick={() => resetForm()}>
+                      Nouveau
+                    </Button>
+                  </div>
+
+                  <ConfirmeDeletion doDelete={() => deleteCouriers(formik.values?.id)}>
+                    <Button color="error" variant="contained">
+                      Supprimer
+                    </Button>
+                  </ConfirmeDeletion>
                 </div>
               }
             </div>
