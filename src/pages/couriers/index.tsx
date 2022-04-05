@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
-import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Autocomplete, Button, Checkbox, Divider, FormControlLabel, IconButton, MenuItem, Paper, Stack, TextField } from '@mui/material';
-import { Formik, Form, Field, useFormik } from 'formik';
+import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { DatePicker } from '@mui/lab';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
@@ -11,7 +11,11 @@ import { API } from '../../DAL/generic';
 import { CourierType } from '../../DAL/couriers/types';
 import { AlertContext, LoadingContext } from '../../contexts';
 import SendIcon from '@mui/icons-material/Send';
-import { Attachments } from './models/attachment';
+import { Attachments } from '../../components/applications/common/abstraction/attachments';
+import { getSelectedValue, getSelectedValues } from '../../helpers';
+import { RelatedModel } from '../../components/applications/common/abstraction/RelatedModel';
+import { AddUpdateExpediteurForm } from '../../components/applications/couriers/forms';
+import moment from 'moment';
 
 type operationType = "insert" | "update"
 
@@ -33,22 +37,28 @@ const validationSchema = Yup.object({
 
 const index = () => {
   const queryClient = useQueryClient()
-  const { isLoading: courierLoading, error: couriersError, data: couriers } = useQuery("couriers", () => API.get_all({
+  const { setAlert } = useContext(AlertContext)
+  const COURIERS_QUERY_KEY = "couriers"
+  const EXPEDITEURS_QUERY_KEY = "expediteurs"
+  const TYPES_COURIERS_QUERY_KEY = "types_couriers"
+  const CLASSIFICATION_QUERY_KEY = "classifications"
+  const STATUS_COURIER_QUERY_KEY = "status"
+  const { isLoading: courierLoading, error: couriersError, data: couriers } = useQuery(COURIERS_QUERY_KEY, () => API.get_all({
     methode: "GET",
     application: "couriers",
     model: "courier",
   }))
-  const { isLoading: exp_Loading, error: exp_error, data: expediteurs } = useQuery("expediteurs", () => API.get_all({
+  const { isLoading: exp_Loading, error: exp_error, data: expediteurs } = useQuery(EXPEDITEURS_QUERY_KEY, () => API.get_all({
     methode: "GET",
     application: "couriers",
     model: "expediteur",
   }))
-  const { isLoading: type_courier_Loading, error: type_courier_error, data: types_couriers } = useQuery("types_couriers", () => API.get_all({
+  const { isLoading: type_courier_Loading, error: type_courier_error, data: types_couriers } = useQuery(TYPES_COURIERS_QUERY_KEY, () => API.get_all({
     methode: "GET",
     application: "couriers",
     model: "types_courier",
   }))
-  const { isLoading: classification_Loading, error: classification_error, data: classifications } = useQuery("classifications", () => API.get_all({
+  const { isLoading: classification_Loading, error: classification_error, data: classifications } = useQuery(CLASSIFICATION_QUERY_KEY, () => API.get_all({
     methode: "GET",
     application: "couriers",
     model: "classification",
@@ -64,19 +74,53 @@ const index = () => {
     application: "couriers",
     model: "courier",
     data: data
-  }))
+  }), {
+    onSuccess: (data) => {
+      setAlert({ status: "success", message: "le courier a été Enregisteré" })
+      formik.setValues(data)
+      queryClient.invalidateQueries(COURIERS_QUERY_KEY)
+      setOperation("update")
+    },
+    onError: () => {
+      setAlert({ status: "error", message: "Erreur de sauvgard du courier!" })
+    }
+  })
   const updateCourierMutation = useMutation((data: CourierType) => API.update_one({
     methode: "PUT",
     application: "couriers",
     model: "courier",
     params: { id: data.id },
     data: data
-  }))
+  }), {
+    onSuccess: () => {
+      setAlert({ status: "success", message: "le courier a été modifié" })
+      queryClient.invalidateQueries(COURIERS_QUERY_KEY)
+    },
+    onError: () => {
+      setAlert({ status: "error", message: "Erreur de modification du courier!" })
+    }
+  })
+  const deleteCouriers = (id?: string) => {
+    if (!id) return
+    API.delete_one({
+      methode: "DELETE",
+      application: "couriers",
+      model: "courier",
+      params: {
+        id: id
+      }
+    }).then(res => {
+      setAlert({ status: "success", message: "supprimé " })
+      queryClient.invalidateQueries(COURIERS_QUERY_KEY)
+      formik.setValues(initialValues)
+    }).catch(err => {
+      setAlert({ status: "error", message: "vous ne pouvez pas supprimer ce courier, il se peut qu'il est utilisé comme réponse à un autre courier . oOu vous n'avez pas les autorisations pour le supprimer " })
+    })
+  }
 
   const [operation, setOperation] = useState("insert" as operationType)
 
 
-  const { setAlert } = useContext(AlertContext)
   if (couriersError || exp_error) {
     setAlert({ status: "error", message: "erreur de communication avec le serveur!" })
   }
@@ -87,19 +131,18 @@ const index = () => {
     initialValues: initialValues,
     validationSchema: validationSchema,
     enableReinitialize: true,
+
+
     onSubmit: (values: CourierType) => {
-      console.log(values);
       switch (operation) {
         case "insert":
           insertCourierMutation.mutate(values)
           break;
         case "update":
           updateCourierMutation.mutate(values)
-          break
+          break;
         default: break
       }
-      queryClient.refetchQueries("couriers")
-
     },
   });
 
@@ -113,18 +156,7 @@ const index = () => {
     formik.resetForm()
     setOperation("insert")
   }
-  const getSelectedValue = (options: any, value: any) => {
-    if (value && options) {
-      return options.filter((option: any) => option.id === value)[0]
-    }
-    else return null
-  }
-  const getSelectedValues = (options: any, values: any) => {
-    if (values && options) {
-      return options.filter((option: any) => values.includes(option.id))
-    }
-    else return []
-  }
+
 
   return (
     <div style={{ display: "flex" }} >
@@ -142,7 +174,7 @@ const index = () => {
               name="objet"
               label="Objet"
               type="text"
-              value={formik.values.objet}
+              value={formik.values?.objet}
               onChange={formik.handleChange}
               error={formik.touched.objet && Boolean(formik.errors.objet)}
               helperText={formik.touched.objet && formik.errors.objet}
@@ -154,7 +186,7 @@ const index = () => {
                 name="n_enregistrement"
                 label="enrigestrement local"
                 type="number"
-                value={formik.values.n_enregistrement}
+                value={formik.values?.n_enregistrement}
                 onChange={formik.handleChange}
                 error={formik.touched.n_enregistrement && Boolean(formik.errors.n_enregistrement)}
                 helperText={formik.touched.n_enregistrement && formik.errors.n_enregistrement}
@@ -165,18 +197,18 @@ const index = () => {
                 name="referance_exp"
                 label="Référence expéditeur"
                 type="number"
-                value={formik.values.referance_exp}
+                value={formik.values?.referance_exp}
                 onChange={formik.handleChange}
                 error={formik.touched.referance_exp && Boolean(formik.errors.referance_exp)}
                 helperText={formik.touched.referance_exp && formik.errors.referance_exp}
               />
               <DatePicker
-
+                inputFormat="dd.MM.yyyy"
                 label="Date d'expédition"
-                value={formik.values.date_expedition}
+                value={formik.values?.date_expedition}
                 onChange={val => {
-                  formik.setFieldValue("date_expedition", val);
-                  console.log(val);
+                  formik.setFieldValue("date_expedition", moment(val).format("YYYY-MM-DD"));
+                  console.log(val?.getDate());
 
                 }}
                 renderInput={(params) =>
@@ -191,12 +223,12 @@ const index = () => {
                 }
               />
               <DatePicker
-                label="Date d'arrivée"
-                value={formik.values.date_arrivee}
-                onChange={val => {
-                  formik.setFieldValue("date_arrivee", val);
-                  console.log(val);
+                inputFormat="dd.MM.yyyy"
 
+                label="Date d'arrivée"
+                value={formik.values?.date_arrivee}
+                onChange={val => {
+                  formik.setFieldValue("date_arrivee", moment(val).format("YYYY-MM-DD"));
                 }}
                 renderInput={(params) =>
                   <TextField
@@ -213,40 +245,19 @@ const index = () => {
 
 
             </Stack>
+            {/**expediteurs */}
+            <RelatedModel
+              options={expediteurs}
+              model="expediteur"
+              label="Expediteur"
+              formik={formik}
+              variableName={"expediteur"}
+              value={getSelectedValue(expediteurs, formik.values?.expediteur)}
+              getOptionLabel={(option) => option.name}
+              QUERY_KEYS={EXPEDITEURS_QUERY_KEY}
+              InsertUpdateForm={<AddUpdateExpediteurForm />}
+            />
 
-            {expediteurs &&
-
-              <Stack direction="row" spacing={1}>
-                <Autocomplete
-                  disablePortal
-                  id="combo-box-expediteur"
-                  options={expediteurs}
-                  sx={{ flexGrow: 1 }}
-                  getOptionLabel={(option) => option.name}
-                  value={getSelectedValue(expediteurs, formik.values.expediteur)}
-                  onChange={(e, val: any) => formik.setFieldValue("expediteur", val?.id || null)}
-                  onBlur={formik.handleBlur}
-                  renderInput={
-                    (params: any) =>
-                      <TextField
-                        label="Expediteur"
-                        fullWidth
-                        {...params}
-                        error={formik.touched.expediteur && Boolean(formik.errors.expediteur)}
-                        helperText={formik.touched.expediteur && formik.errors.expediteur}
-                      />
-                  }
-                />
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <IconButton>
-                    <AddOutlinedIcon color='primary' />
-                  </IconButton>
-                  <IconButton>
-                    <AutoFixNormalOutlinedIcon color='secondary' />
-                  </IconButton>
-                </div>
-              </Stack>
-            }
 
 
             <Stack direction="row" spacing={1}>
@@ -257,7 +268,7 @@ const index = () => {
                   name="direction"
                   select
                   label="Direction"
-                  value={formik.values.direction}
+                  value={formik.values?.direction}
                   onChange={formik.handleChange}
                   error={formik.touched.direction && Boolean(formik.errors.direction)}
                   helperText={formik.touched.direction && formik.errors.direction}
@@ -269,228 +280,111 @@ const index = () => {
                   ))}
                 </TextField>
               </div>
-              {types_couriers &&
-                <Stack direction="row" sx={{flexGrow:1}}>
-                  <Autocomplete
-                    disablePortal
-                    id="combo-box-type"
-                    options={types_couriers}
-                    sx={{ flexGrow: 1 }}
-                    getOptionLabel={(option) => option.name}
-                    value={getSelectedValue(types_couriers, formik.values.type)}
-                    onChange={(e, val) => formik.setFieldValue("type", val?.id || null)}
-                    onBlur={formik.handleBlur}
-                    renderInput={
-                      (params: any) =>
-                        <TextField
-                          label="type"
-                          fullWidth
-                          {...params}
-                          error={formik.touched.type && Boolean(formik.errors.type)}
-                          helperText={formik.touched.type && formik.errors.type}
-                        />
-                    }
-                  />
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <IconButton>
-                      <AddOutlinedIcon color='primary' />
-                    </IconButton>
-                    <IconButton>
-                      <AutoFixNormalOutlinedIcon color='secondary' />
-                    </IconButton>
-                  </div>
-                </Stack>
-              }
+              {/**Types de courier */}
+              <RelatedModel
+                options={types_couriers}
+                model="types_courier"
+                label="Type du courier"
+                formik={formik}
+                variableName="type"
+                value={getSelectedValue(types_couriers, formik.values?.type)}
+                getOptionLabel={(option) => option.name}
+                QUERY_KEYS={TYPES_COURIERS_QUERY_KEY}
+                InsertUpdateForm={<AddUpdateExpediteurForm />}
+              />
 
             </Stack>
+            {/** classification */}
+            <RelatedModel
+              options={classifications}
+              model="classification"
+              label="Classification du courier"
+              formik={formik}
+              variableName="classification"
+              value={getSelectedValue(classifications, formik.values?.classification)}
+              getOptionLabel={(option) => option.name}
+              QUERY_KEYS={CLASSIFICATION_QUERY_KEY}
+              InsertUpdateForm={<AddUpdateExpediteurForm />}
+            />
+            {/** status courier (traitement) */}
+            <RelatedModel
+              options={status}
+              model="statu"
+              label="Statut du courier"
+              formik={formik}
+              variableName="status"
+              value={getSelectedValue(status, formik.values?.status)}
+              getOptionLabel={(option) => option.name}
+              QUERY_KEYS={STATUS_COURIER_QUERY_KEY}
+              InsertUpdateForm={<AddUpdateExpediteurForm />}
+            />
 
-            {classifications &&
-              <Stack direction="row" spacing={1}>
-                <Autocomplete
-                  disablePortal
-                  id="combo-box-classification"
-                  options={classifications}
-                  sx={{ flexGrow: 1 }}
-                  getOptionLabel={(option) => option.name}
-                  value={getSelectedValue(classifications, formik.values.classification)}
-                  onChange={(e, val) => formik.setFieldValue("classification", val?.id || null)}
-                  onBlur={formik.handleBlur}
-                  renderInput={
-                    (params: any) =>
-                      <TextField
-                        label="Classification"
-                        fullWidth
-                        {...params}
-                        error={formik.touched.classification && Boolean(formik.errors.classification)}
-                        helperText={formik.touched.classification && formik.errors.classification}
-                      />
-                  }
-                />
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <IconButton>
-                    <AddOutlinedIcon color='primary' />
-                  </IconButton>
-                  <IconButton>
-                    <AutoFixNormalOutlinedIcon color='secondary' />
-                  </IconButton>
-                </div>
-              </Stack>
-            }
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={formik.values.exige_reponse}
+                  checked={formik.values?.exige_reponse}
                   onChange={(e) => {
                     formik.setFieldValue("exige_reponse", e.target.checked);
                   }} />
               }
               label="Exige une réponse"
             />
-            {couriers &&
-              <Stack direction="row" spacing={1}>
-                <Autocomplete
-                  disablePortal
-                  id="combo-box-reponse"
-                  options={couriers}
-                  sx={{ flexGrow: 1 }}
-                  getOptionLabel={(option) => option.objet}
-                  value={getSelectedValue(couriers, formik.values.reponse)}
-                  onChange={(e, val) => formik.setFieldValue("reponse", val?.id || null)}
-                  onBlur={formik.handleBlur}
-                  renderInput={
-                    (params: any) =>
-                      <TextField
-                        label="reponse"
-                        fullWidth
-                        {...params}
-                        error={formik.touched.reponse && Boolean(formik.errors.reponse)}
-                        helperText={formik.touched.reponse && formik.errors.reponse}
-                      />
-                  }
-                />
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <IconButton>
-                    <AddOutlinedIcon color='primary' />
-                  </IconButton>
-                  <IconButton>
-                    <AutoFixNormalOutlinedIcon color='secondary' />
-                  </IconButton>
-                </div>
-              </Stack>
-            }
+
+            {/** réponse ( c'est un courier aussi) */}
+            <RelatedModel
+              options={couriers}
+              model="courier"
+              label="Réponse"
+              formik={formik}
+              variableName="reponse"
+              value={getSelectedValue(couriers, formik.values?.reponse)}
+              getOptionLabel={(option) => option.objet}
+              QUERY_KEYS={COURIERS_QUERY_KEY}
+              InsertUpdateForm={<></>}
+            />
+
             <TextField
               fullWidth
               id="instructions"
               name="instructions"
               label="instructions"
               type="text"
-              value={formik.values.instructions}
+              value={formik.values?.instructions}
               onChange={formik.handleChange}
               error={formik.touched.instructions && Boolean(formik.errors.instructions)}
               helperText={formik.touched.instructions && formik.errors.instructions}
             />
-            {status &&
-              <Stack direction="row" spacing={1}>
-                <Autocomplete
-                  disablePortal
-                  id="combo-box-status"
-                  options={status}
-                  sx={{ flexGrow: 1 }}
-                  getOptionLabel={(option) => option.name}
-                  value={getSelectedValue(status, formik.values.status)}
-                  onChange={(e, val) => formik.setFieldValue("status", val?.id || null)}
-                  onBlur={formik.handleBlur}
-                  renderInput={
-                    (params: any) =>
-                      <TextField
-                        label="status"
-                        fullWidth
-                        {...params}
-                        error={formik.touched.status && Boolean(formik.errors.status)}
-                        helperText={formik.touched.status && formik.errors.status}
-                      />
-                  }
-                />
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <IconButton>
-                    <AddOutlinedIcon color='primary' />
-                  </IconButton>
-                  <IconButton>
-                    <AutoFixNormalOutlinedIcon color='secondary' />
-                  </IconButton>
-                </div>
-              </Stack>
-            }
-            {expediteurs &&
-              <Stack direction="row" spacing={1}>
-                <Autocomplete
-                  multiple
-                  disablePortal
-                  id="combo-box-destinataires"
-                  options={expediteurs}
-                  sx={{ flexGrow: 1 }}
-                  getOptionLabel={(option) => option.name}
-                  value={getSelectedValues(expediteurs, formik.values.destinataires)}
-                  onChange={(e, vals) => formik.setFieldValue("destinataires", vals?.map(val => val.id) || null)}
-                  onBlur={formik.handleBlur}
-                  renderInput={
-                    (params: any) =>
-                      <TextField
-                        label="destinataires"
-                        fullWidth
-                        {...params}
-                        error={formik.touched.destinataires && Boolean(formik.errors.destinataires)}
-                        helperText={formik.touched.destinataires && formik.errors.destinataires}
-                      />
-                  }
-                />
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <IconButton>
-                    <AddOutlinedIcon color='primary' />
-                  </IconButton>
-                  <IconButton>
-                    <AutoFixNormalOutlinedIcon color='secondary' />
-                  </IconButton>
-                </div>
-              </Stack>
-            }
 
-            {expediteurs &&
-              <Stack direction="row" spacing={1}>
-                <Autocomplete
-                  multiple
-                  disablePortal
-                  id="combo-box-visible_a"
-                  options={expediteurs}
-                  sx={{ flexGrow: 1 }}
-                  getOptionLabel={(option) => option.name}
-                  value={getSelectedValues(expediteurs, formik.values.visible_a)}
-                  onChange={(e, vals) => formik.setFieldValue("visible_a", vals?.map(val => val.id) || null)}
-                  onBlur={formik.handleBlur}
-                  renderInput={
-                    (params: any) =>
-                      <TextField
-                        label="Visible par"
-                        fullWidth
-                        {...params}
-                        error={formik.touched.visible_a && Boolean(formik.errors.visible_a)}
-                        helperText={formik.touched.visible_a && formik.errors.visible_a}
-                      />
-                  }
-                />
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <IconButton>
-                    <AddOutlinedIcon color='primary' />
-                  </IconButton>
-                  <IconButton>
-                    <AutoFixNormalOutlinedIcon color='secondary' />
-                  </IconButton>
-                </div>
-              </Stack>
-            }
-            <Divider/>
+            {/** destinataires (expediteurs) */}
+            <RelatedModel
+              multiple
+              options={expediteurs}
+              model="expediteur"
+              label="Destinataires"
+              formik={formik}
+              variableName="destinataires"
+              value={getSelectedValues(expediteurs, formik.values?.destinataires)}
+              getOptionLabel={(option) => option.name}
+              QUERY_KEYS={EXPEDITEURS_QUERY_KEY}
+              InsertUpdateForm={<AddUpdateExpediteurForm />}
+            />
+            {/** visible à  (expediteurs) */}
+            <RelatedModel
+              multiple
+              options={expediteurs}
+              model="expediteur"
+              label="Visible à"
+              formik={formik}
+              variableName="visible_a"
+              value={getSelectedValues(expediteurs, formik.values?.visible_a)}
+              getOptionLabel={(option) => option.name}
+              QUERY_KEYS={EXPEDITEURS_QUERY_KEY}
+              InsertUpdateForm={<AddUpdateExpediteurForm />}
+            />
+
+            <Divider />
             <div>
-            {formik.values?.id && <Attachments id_courier={formik.values.id}/>}
+              {formik.values?.id && <Attachments model='attachment' id_parent={formik.values?.id} />}
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -498,19 +392,25 @@ const index = () => {
                 <Button color="success" variant="contained" type="submit">
                   Enregistrer
                 </Button>
-                <Button color="primary" variant="contained" endIcon={<SendIcon />} >
-                  Envoyer par Mail
-                </Button>
-                <Button color="error" variant="contained" >
-                  Supprimer
-                </Button>
-              </div>
-              <div>
-                <Button color="info" variant="contained" onClick={() => resetForm()}>
-                  Nouveau
-                </Button>
-              </div>
+                {formik.values?.id &&
+                  <>
+                    <Button color="primary" variant="contained" endIcon={<SendIcon />} >
+                      Envoyer par Mail
+                    </Button>
 
+                    <Button color="error" variant="contained" onClick={() => deleteCouriers(formik.values?.id)}>
+                      Supprimer
+                    </Button>
+                  </>
+                }
+              </div>
+              {formik.values?.id &&
+                <div>
+                  <Button color="info" variant="contained" onClick={() => resetForm()}>
+                    Nouveau
+                  </Button>
+                </div>
+              }
             </div>
 
           </Stack>
@@ -526,7 +426,6 @@ export default index
 
 
 const initialValues: CourierType = {
-  id: "",
   objet: "",
   direction: "",
   n_enregistrement: "",

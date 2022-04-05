@@ -9,7 +9,8 @@ export type endPointType = {
     url?: string
     params?: any,
     data?: any,
-    protected?:boolean
+    protected?:boolean,
+    extra_headers?:any,
 }
 
 export interface IApis {

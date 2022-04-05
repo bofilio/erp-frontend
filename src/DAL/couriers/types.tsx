@@ -1,6 +1,6 @@
 export type CouriesModels="courier"|"expediteur"|"types_courier"|"classification"|"statu"|"attachment"
 export type CourierType = {
-    id:string;
+    id?:string;
     objet: string;
     direction: "arrivee"|"depart"|"";
     n_enregistrement: number|"";
