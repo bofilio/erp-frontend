@@ -19,19 +19,20 @@ type AddUpdateModelProps = {
 export const AddModelInstance: React.FC<AddUpdateModelProps> = (props) => {
     const { onceDone, value,application, model, formComponent,extra_headers={} } = props
     const {setAlert} =useContext(AlertContext)
-    const insertMutation = useMutation((data: any) => API.create_one({
+    const insertMutation = useMutation<any,Error>((data: any) => API.create_one({
         methode: "POST",
         application: application,
         model: model,
         data: data,
         extra_headers:extra_headers,
     }), {
-        onSuccess: () =>{
+        onSuccess: (data) =>{
             setAlert({status:"success", message:"sauvgardé"})
             onceDone()
         } ,
        onError:(err)=>{
-        setAlert({status:"error", message:`Erreur de sauvgarde`})
+        const error = JSON.parse(err.message)
+        setAlert({ status: "error", message: JSON.stringify(error.data.detail) })
        }
     }) 
 
