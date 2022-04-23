@@ -1,16 +1,19 @@
 
 import { CouriesModels } from "./couriers/types";
+import { GrhModels } from "./grh/types";
 
+export type modelType=CouriesModels | GrhModels;
+export type applicationType="couriers" | "grh" | "common";
 export type endPointType = {
     methode: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-    application?: "couriers" | "gestion_access";
-    model?: CouriesModels;
-    id?:string;
+    application?: applicationType
+    model?: modelType
+    id?: string;
     url?: string
     params?: any,
     data?: any,
-    protected?:boolean,
-    extra_headers?:any,
+    protected?: boolean,
+    extra_headers?: any,
 }
 
 export interface IApis {

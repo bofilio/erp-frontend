@@ -36,7 +36,7 @@ export const Layout: React.FC<{}> = (props) => {
             {
                 <Snackbar
                     open={Boolean(alert?.message)}
-                    autoHideDuration={6000}
+                    autoHideDuration={15000}
                     onClose={() => setAlert({ status: "info", message: "" })}
                     anchorOrigin={{ vertical: "top", horizontal: "center" }}
                 >
@@ -59,7 +59,7 @@ export const Layout: React.FC<{}> = (props) => {
                             height: 64,
                         }}
                     >
-                        <NavBarContent handleDrawerToggle={handleDrawerToggle} />
+                        <NavBarContent />
                     </AppBar>
 
                     <Box
@@ -69,25 +69,10 @@ export const Layout: React.FC<{}> = (props) => {
 
                     >
                         {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
-                        <Drawer
-                            variant="temporary"
-                            open={mobileOpen}
-                            onClose={handleDrawerToggle}
-                            ModalProps={{
-                                keepMounted: true, // Better open performance on mobile.
-                            }}
-                            sx={{
-                                display: { xs: 'block', sm: 'none' },
-                                backgroundColor: theme.palette.primary.main,
-                                '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-                            }}
-                        >
-                            <SideBarContent />
-                        </Drawer>
+
                         <Drawer
                             variant="permanent"
                             sx={{
-                                display: { xs: 'none', sm: 'block' },
                                 '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
                             }}
                             open

@@ -1,6 +1,0 @@
-import { endPointType } from "../types";
-
-
-
-
-

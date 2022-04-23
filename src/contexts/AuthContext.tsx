@@ -1,16 +1,15 @@
 
 import React, { createContext, FC, useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
 
 export const USER_KEY="current_user"
-type userType = {
+export type userType = {
     id?: string,
     username: string,
     fullname?: string,
     email?:string
-    token:string|null,
+    token:string;
 }
-type CurrentUser=userType|null
+export type CurrentUser=userType|null
 
 type AlertContextType = {
     currentUser: CurrentUser,
@@ -25,8 +24,6 @@ export const AuthContext = createContext<AlertContextType>({
 export const AuthProvider: FC<{}> = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null as CurrentUser)
     const contextValue = { currentUser, setCurrentUser }
-   
-    
 
     
     useEffect(()=>{

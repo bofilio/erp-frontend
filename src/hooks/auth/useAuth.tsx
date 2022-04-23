@@ -45,7 +45,6 @@ export const useAuth = () => {
                 break;
             default: return
         }
-        console.log(authState);
     }
     return { authState, dispatch }
 

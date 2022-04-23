@@ -7,20 +7,11 @@ import GroupAddOutlinedIcon from '@mui/icons-material/GroupAddOutlined';
 import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 import Link from 'next/link';
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(2),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-  '&:hover': {
-    transform: 'scale(1.05)'
-  },
-}));
+
 
 const Home: NextPage = () => {
   return (
-    <AuthenticatedGuard>
+    
       <Box sx={{ padding: 2 }}>
         <Typography variant="body1">
           Applications
@@ -51,7 +42,7 @@ const Home: NextPage = () => {
         <Divider />
       </Box>
 
-    </AuthenticatedGuard >
+   
   )
 }
 export default Home

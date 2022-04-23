@@ -1,9 +1,15 @@
 import axios, { AxiosResponse } from "axios";
+import { userType, USER_KEY } from "../contexts";
 import { baseURL } from "./config";
 import { endPointType, IApis } from "./types";
 
 export function getHeaders() {
-    return {}
+    const user_str = localStorage.getItem(USER_KEY)
+    const cuurentUser: userType = user_str !== null ? JSON.parse(user_str) : null
+    if (cuurentUser !== null)
+        return {
+            "Authorization": `JWT ${cuurentUser.token}`
+        }
 }
 
 
@@ -18,7 +24,13 @@ export class Apis implements IApis {
             })
             return response
         } catch (err: any) {
-            throw new Error(err.message);
+            throw new Error(
+                JSON.stringify(
+                    {
+                        data: err.response.data,
+                        status: err.response.status
+                    }
+                ));
         }
     }
     async logout(endpoint: endPointType): Promise<any> {
@@ -31,7 +43,13 @@ export class Apis implements IApis {
             })
             return response.data
         } catch (err: any) {
-            throw new Error(err.message);
+            throw new Error(
+                JSON.stringify(
+                    {
+                        data: err.response.data,
+                        status: err.response.status
+                    }
+                ));
         }
     }
     async get_all(endpoint: endPointType): Promise<any> {
@@ -44,7 +62,13 @@ export class Apis implements IApis {
             })
             return response.data
         } catch (err: any) {
-            throw new Error(err.message);
+            throw new Error(
+                JSON.stringify(
+                    {
+                        data: err.response.data,
+                        status: err.response.status
+                    }
+                ));
         }
     }
 
@@ -59,7 +83,13 @@ export class Apis implements IApis {
             })
             return response.data
         } catch (err: any) {
-            throw new Error(err.message);
+            throw new Error(
+                JSON.stringify(
+                    {
+                        data: err.response.data,
+                        status: err.response.status
+                    }
+                ));
         }
     }
     async get_one(endpoint: endPointType): Promise<any> {
@@ -72,35 +102,53 @@ export class Apis implements IApis {
             })
             return response.data
         } catch (err: any) {
-            throw new Error(err.message);
+            throw new Error(
+                JSON.stringify(
+                    {
+                        data: err.response.data,
+                        status: err.response.status
+                    }
+                ));
         }
     }
     async create_one(endpoint: endPointType): Promise<any> {
-        const { methode, application, model, data,extra_headers } = endpoint
-       
+        const { methode, application, model, data, extra_headers } = endpoint
+
         if (methode !== "POST")
             throw new Error("HTTP Method not supported!.");
         try {
             const response = await axios.post(`${baseURL}/${application}/${model}s/`, data, {
-                headers: {...getHeaders(),...extra_headers},
+                headers: { ...getHeaders(), ...extra_headers },
             })
             return response.data
         } catch (err: any) {
-            throw new Error(err.message);
+            throw new Error(
+                JSON.stringify(
+                    {
+                        data: err.response.data,
+                        status: err.response.status
+                    }
+                ));
         }
     }
     async update_one(endpoint: endPointType): Promise<any> {
-        const { methode, application, model, params, data,extra_headers={} } = endpoint
-        
+        const { methode, application, model, params, data, extra_headers = {} } = endpoint
+
         if (methode !== "PUT")
             throw new Error("HTTP Method not supported!.");
         try {
             const response = await axios.put(`${baseURL}/${application}/${model}s/${params.id}/`, data, {
-                headers: {...getHeaders(),...extra_headers},
+                headers: { ...getHeaders(), ...extra_headers },
             })
             return response.data
         } catch (err: any) {
-            throw new Error(err.message);
+            throw new Error(
+                JSON.stringify(
+                    {
+                        data: err.response.data,
+                        status: err.response.status
+                    }
+                ));
         }
     }
     async delete_one(endpoint: endPointType): Promise<any> {
@@ -113,7 +161,13 @@ export class Apis implements IApis {
             })
             return response.data
         } catch (err: any) {
-            throw new Error(err.message);
+            throw new Error(
+                JSON.stringify(
+                    {
+                        data: err.response.data,
+                        status: err.response.status
+                    }
+                ));
         }
     }
 }

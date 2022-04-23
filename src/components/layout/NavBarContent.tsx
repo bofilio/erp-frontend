@@ -1,6 +1,5 @@
-import { Button, IconButton, Toolbar, Typography } from '@mui/material'
+import { Stack, IconButton, Toolbar, Typography, Avatar, Button } from '@mui/material'
 import React, { useContext } from 'react'
-import MenuIcon from '@mui/icons-material/Menu';
 import { AuthContext } from '../../contexts';
 import Link from 'next/link';
 
@@ -12,30 +11,29 @@ export const NavBarContent = ({ handleDrawerToggle }: any) => {
             <Link href='/'>
                 <a>
                     <Typography variant="button" noWrap component="div">
-                        Home
+                        Accueil
                     </Typography>
                 </a>
             </Link>
 
-            {
-                currentUser ?
+            {currentUser &&
+                <Stack spacing={2} direction="row" alignItems="center">
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                        <Typography variant="button">
+                            {currentUser.username}
+                        </Typography>
+                        <Avatar>
+
+                        </Avatar>
+                    </Stack>
+
+
                     <Link href='/auth/logout'>
-                        <a>
-                            <Typography variant="button" noWrap component="span">
-                                Logout
-                            </Typography>
-                        </a>
+                        <Button color="info" size="small">
+                            Quiter
+                        </Button>
                     </Link>
-                    :
-                    <Link href='/auth/login'>
-                        <a>
-                            <Typography variant="button" noWrap component="span">
-                                Login
-                            </Typography>
-                        </a>
-
-                    </Link>
-
+                </Stack>
             }
         </Toolbar>
     )

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Button, Checkbox, Divider, FormControlLabel, IconButton, MenuItem, Paper, Stack, TextField } from '@mui/material';
 import { useFormik } from 'formik';
@@ -42,31 +42,31 @@ const index = () => {
   const TYPES_COURIERS_QUERY_KEY = "types_couriers"
   const CLASSIFICATION_QUERY_KEY = "classifications"
   const STATUS_COURIER_QUERY_KEY = "status"
-  const { isLoading: courierLoading, error: couriersError, data: couriers } = useQuery(COURIERS_QUERY_KEY, () => API.get_all({
+  const { isLoading: courierLoading, error: couriersError, data: couriers } = useQuery<boolean, Error, CourierType[]>(COURIERS_QUERY_KEY, () => API.get_all({
     methode: "GET",
     application: "couriers",
     model: "courier",
-  }))
-  const { isLoading: exp_Loading, error: exp_error, data: expediteurs } = useQuery(EXPEDITEURS_QUERY_KEY, () => API.get_all({
+  }), { retry: false })
+  const { isLoading: exp_Loading, error: exp_error, data: expediteurs } = useQuery<boolean, Error, any>(EXPEDITEURS_QUERY_KEY, () => API.get_all({
     methode: "GET",
     application: "couriers",
     model: "expediteur",
-  }))
+  }), { retry: false })
   const { isLoading: type_courier_Loading, error: type_courier_error, data: types_couriers } = useQuery(TYPES_COURIERS_QUERY_KEY, () => API.get_all({
     methode: "GET",
     application: "couriers",
     model: "types_courier",
-  }))
+  }), { retry: false })
   const { isLoading: classification_Loading, error: classification_error, data: classifications } = useQuery(CLASSIFICATION_QUERY_KEY, () => API.get_all({
     methode: "GET",
     application: "couriers",
     model: "classification",
-  }))
+  }), { retry: false })
   const { isLoading: statu_Loading, error: statu_error, data: status } = useQuery("status", () => API.get_all({
     methode: "GET",
     application: "couriers",
     model: "statu",
-  }))
+  }), { retry: false })
 
   const insertCourierMutation = useMutation((data: CourierType) => API.create_one({
     methode: "POST",
@@ -120,18 +120,10 @@ const index = () => {
   const [operation, setOperation] = useState("insert" as operationType)
 
 
-  if (couriersError || exp_error) {
-    setAlert({ status: "error", message: "erreur de communication avec le serveur!" })
-  }
-
-
-
   const formik = useFormik({
     initialValues: initialValues,
     validationSchema: validationSchema,
     enableReinitialize: true,
-
-
     onSubmit: (values: CourierType) => {
       switch (operation) {
         case "insert":
@@ -146,17 +138,27 @@ const index = () => {
   });
 
 
+  useEffect(() => {
+    if (couriersError != null) {
+      const error = JSON.parse(couriersError.message)
+      setAlert({ status: "error", message: error.data.detail })
+    }
+  }, [couriersError])
+
   const OnSelectionChange = (id: any) => {
-    const selectedCourier = couriers.filter((item: any) => item.id === id)[0]
-    formik.setValues(selectedCourier)
-    setOperation("update")
+    const selectedCourier = couriers?.filter((item: any) => item.id === id)[0]
+    if (selectedCourier) {
+      formik.setValues(selectedCourier)
+      setOperation("update")
+    }
   }
   const resetForm = () => {
     formik.resetForm()
     setOperation("insert")
   }
-
-
+  if (couriersError !== null) return (
+    <div>ERROR</div>
+  )
   return (
     <div style={{ display: "flex" }} >
       <Paper sx={{ width: "33%", margin: 1, padding: 1 }}>
@@ -207,8 +209,6 @@ const index = () => {
                 value={formik.values?.date_expedition}
                 onChange={val => {
                   formik.setFieldValue("date_expedition", moment(val).format("YYYY-MM-DD"));
-                  console.log(val?.getDate());
-
                 }}
                 renderInput={(params) =>
                   <TextField
@@ -247,6 +247,7 @@ const index = () => {
             {/**expediteurs */}
             <RelatedModel
               options={expediteurs}
+              appliation="couriers"
               model="expediteur"
               label="Expediteur"
               formik={formik}
@@ -282,6 +283,7 @@ const index = () => {
               {/**Types de courier */}
               <RelatedModel
                 options={types_couriers}
+                appliation="couriers"
                 model="types_courier"
                 label="Type du courier"
                 formik={formik}
@@ -296,6 +298,7 @@ const index = () => {
             {/** classification */}
             <RelatedModel
               options={classifications}
+              appliation="couriers"
               model="classification"
               label="Classification du courier"
               formik={formik}
@@ -308,6 +311,7 @@ const index = () => {
             {/** status courier (traitement) */}
             <RelatedModel
               options={status}
+              appliation="couriers"
               model="statu"
               label="Statut du courier"
               formik={formik}
@@ -332,6 +336,7 @@ const index = () => {
             {/** réponse ( c'est un courier aussi) */}
             <RelatedModel
               options={couriers}
+              appliation="couriers"
               model="courier"
               label="Réponse"
               formik={formik}
@@ -339,7 +344,6 @@ const index = () => {
               value={getSelectedValue(couriers, formik.values?.reponse)}
               getOptionLabel={(option) => option.objet}
               QUERY_KEYS={COURIERS_QUERY_KEY}
-              InsertUpdateForm={<></>}
             />
 
             <TextField
@@ -358,6 +362,7 @@ const index = () => {
             <RelatedModel
               multiple
               options={expediteurs}
+              appliation="couriers"
               model="expediteur"
               label="Destinataires"
               formik={formik}
@@ -371,6 +376,7 @@ const index = () => {
             <RelatedModel
               multiple
               options={expediteurs}
+              appliation="couriers"
               model="expediteur"
               label="Visible pour"
               formik={formik}

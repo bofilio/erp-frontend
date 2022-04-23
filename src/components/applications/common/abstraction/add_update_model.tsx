@@ -2,12 +2,13 @@
 import React, { useContext } from 'react'
 import { useMutation } from 'react-query'
 import { API } from '../../../../DAL/generic'
-import { modelType } from '../../../../DAL/common/query';
 import { AlertContext } from '../../../../contexts';
+import { applicationType, modelType } from '../../../../DAL/types';
 
 type AddUpdateModelProps = {
     value?: any;
     onceDone: () => void;
+    application:applicationType;
     model: modelType;
     formComponent: JSX.Element;
     extra_headers?:any;
@@ -16,11 +17,11 @@ type AddUpdateModelProps = {
 
 
 export const AddModelInstance: React.FC<AddUpdateModelProps> = (props) => {
-    const { onceDone, value, model, formComponent,extra_headers={} } = props
+    const { onceDone, value,application, model, formComponent,extra_headers={} } = props
     const {setAlert} =useContext(AlertContext)
     const insertMutation = useMutation((data: any) => API.create_one({
         methode: "POST",
-        application: "couriers",
+        application: application,
         model: model,
         data: data,
         extra_headers:extra_headers,
@@ -51,12 +52,13 @@ export const AddModelInstance: React.FC<AddUpdateModelProps> = (props) => {
 
     )
 }
+
 export const UpdateModelInstance: React.FC<AddUpdateModelProps> = (props) => {
-    const { onceDone, value, model, formComponent,extra_headers } = props
+    const { onceDone, value,application, model, formComponent,extra_headers } = props
     const {setAlert} =useContext(AlertContext)
     const updateMutation = useMutation((data: any) => API.update_one({
         methode: "PUT",
-        application: "couriers",
+        application: application,
         model: model,
         data: data,
         params: { id: value?.id },

@@ -17,9 +17,6 @@ export const AlertProvider: FC<{}> = ({ children }) => {
     const [alert, updateAlert] = useState({ status:"info", message: "" } as AlertProps)
     const setAlert=(alert:AlertProps)=>{
         updateAlert(alert)
-        setTimeout(()=>{
-            updateAlert({ status:"info", message: "" })
-        },5000)
     }
     const contextValue={alert,setAlert}
     return (

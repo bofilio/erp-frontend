@@ -13,7 +13,15 @@ import { QueryClient, QueryClientProvider } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools'
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
-const queryClient = new QueryClient()
+import { AuthenticatedGuard } from '../components/guards';
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+    },
+
+  },
+})
 
 function MyApp({ Component, pageProps }: AppProps) {
 
@@ -21,17 +29,19 @@ function MyApp({ Component, pageProps }: AppProps) {
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={true} />
       <AuthProvider>
-        <ThemeProvider theme={theme1}>
-          <LoadingProvider>
-            <AlertProvider>
-              <Layout>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                 <Component {...pageProps} />
-              </LocalizationProvider>
-              </Layout>
-            </AlertProvider>
-          </LoadingProvider>
-        </ThemeProvider>
+        <AuthenticatedGuard>
+          <ThemeProvider theme={theme1}>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <LoadingProvider>
+                <AlertProvider>
+                  <Layout>
+                    <Component {...pageProps} />
+                  </Layout>
+                </AlertProvider>
+              </LoadingProvider>
+            </LocalizationProvider>
+          </ThemeProvider>
+        </AuthenticatedGuard>
       </AuthProvider>
 
     </QueryClientProvider>

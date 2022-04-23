@@ -33,13 +33,12 @@ const Login: NextPage = () => {
     const { currentUser } = React.useContext(AuthContext)
 
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit =  (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const form_data = new FormData(event.currentTarget);
-        dispatch({ type: "LOGIN", payload: { username: form_data.get("username"), password: form_data.get('password') } })
-        
+        dispatch({ type: "LOGIN", payload: { username: form_data.get("username"), password: form_data.get('password') } }) 
     };
-    React.useLayoutEffect(() => {
+    React.useEffect(() => {
         if (currentUser !== null) router.push('/')
     }, [currentUser])
 
@@ -100,7 +99,7 @@ const Login: NextPage = () => {
                                     autoComplete="current-password"
                                 />
                                 <FormControlLabel
-                                    control={<Checkbox value="remember" color="primary" />}
+                                    control={<Checkbox checked value="remember" color="primary" />}
                                     label="Rappeler moi"
                                 />
                                 <Button

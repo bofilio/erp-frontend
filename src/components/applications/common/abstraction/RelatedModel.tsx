@@ -4,12 +4,12 @@ import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import AutoFixNormalOutlinedIcon from '@mui/icons-material/AutoFixNormalOutlined';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { API } from '../../../../DAL/generic';
-import { modelType } from '../../../../DAL/common/query';
 import { useQueryClient } from 'react-query';
 import { CloseModal, ModalProvider, MyModal, OpenModal } from '../../../../contexts/ModalContext';
 import { AlertContext } from '../../../../contexts';
 import { AddModelInstance, UpdateModelInstance } from './add_update_model';
 import { ConfirmeDeletion } from '../../../util';
+import { applicationType, modelType } from '../../../../DAL/types';
 
 type RelatedModelProps = {
     formik: any;
@@ -18,20 +18,21 @@ type RelatedModelProps = {
     label: string;
     value: any;
     variableName: string;
+    appliation: applicationType;
     model: modelType;
     getOptionLabel: (option: any) => string;
     QUERY_KEYS: string;
-    InsertUpdateForm: JSX.Element;
+    InsertUpdateForm?: JSX.Element;
 }
 export const RelatedModel: React.FC<RelatedModelProps> = (props) => {
-    const { formik, options, multiple = false, label, value, variableName, model, getOptionLabel, QUERY_KEYS, InsertUpdateForm } = props
+    const { formik, options, multiple = false, label, value, variableName, appliation, model, getOptionLabel, QUERY_KEYS, InsertUpdateForm } = props
     const [queryHasChanged, setQueryHasChanged] = useState(false)
     const queryClient = useQueryClient()
     const { setAlert } = useContext(AlertContext)
     const deleteInstance = (id: any) => {
         API.delete_one({
             methode: "DELETE",
-            application: "couriers",
+            application: appliation,
             model: model,
             params: {
                 id: id
@@ -40,7 +41,7 @@ export const RelatedModel: React.FC<RelatedModelProps> = (props) => {
             setQueryHasChanged(true)
             setAlert({ status: "success", message: "supprimé " })
         }).catch(err => {
-            setAlert({ status: "error", message: "vous ne pouvez pas le supprimer, car il est déja utilisé par d'autre instance " })
+            setAlert({ status: "error", message: "Erreur de supprission " })
         })
     }
     useEffect(() => {
@@ -75,54 +76,58 @@ export const RelatedModel: React.FC<RelatedModelProps> = (props) => {
                                 />
                         }
                     />
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                        {/**add instance */}
-                        <ModalProvider>
-                            <OpenModal>
-                                <IconButton>
-                                    <AddOutlinedIcon color='secondary' />
-                                </IconButton>
-                            </OpenModal>
-                            <MyModal>
-                                <AddModelInstance
-                                    onceDone={() => setQueryHasChanged(true)}
-                                    model={model}
-                                    formComponent={InsertUpdateForm}
-                                />
+                    {InsertUpdateForm &&
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                            {/**add instance */}
+                            <ModalProvider>
+                                <OpenModal>
+                                    <IconButton>
+                                        <AddOutlinedIcon color='secondary' />
+                                    </IconButton>
+                                </OpenModal>
+                                <MyModal>
+                                    <AddModelInstance
+                                        onceDone={() => setQueryHasChanged(true)}
+                                        application={appliation}
+                                        model={model}
+                                        formComponent={InsertUpdateForm}
+                                    />
+                                </MyModal>
 
-                            </MyModal>
+                            </ModalProvider>
+                            {/**update instance */}
+                            {value && !multiple &&
+                                <>
+                                    {/**update icon */}
+                                    <ModalProvider>
+                                        <OpenModal>
+                                            <IconButton>
+                                                <AutoFixNormalOutlinedIcon color='primary' />
+                                            </IconButton>
+                                        </OpenModal>
+                                        <MyModal>
+                                            <UpdateModelInstance
+                                                value={value}
+                                                onceDone={() => setQueryHasChanged(true)}
+                                                application={appliation}
+                                                model={model}
+                                                formComponent={InsertUpdateForm}
+                                            />
+                                        </MyModal>
+                                    </ModalProvider>
 
-                        </ModalProvider>
-                        {/**update instance */}
-                        {value && !multiple &&
-                            <>
-                                {/**update icon */}
-                                <ModalProvider>
-                                    <OpenModal>
+                                    {/**delete icon with confirmation context */}
+                                    <ConfirmeDeletion doDelete={() => deleteInstance(value?.id)}>
                                         <IconButton>
-                                            <AutoFixNormalOutlinedIcon color='primary' />
-                                        </IconButton>
-                                    </OpenModal>
-                                    <MyModal>
-                                        <UpdateModelInstance
-                                            value={value}
-                                            onceDone={() => setQueryHasChanged(true)}
-                                            model={model}
-                                            formComponent={InsertUpdateForm}
-                                        />
-                                    </MyModal>
-                                </ModalProvider>
-
-                                {/**delete icon with confirmation context */}
-                                <ConfirmeDeletion doDelete={() => deleteInstance(value?.id)}>
-                                     <IconButton>
                                             <HighlightOffIcon color='error' />
                                         </IconButton>
-                                </ConfirmeDeletion>
-                            </>
+                                    </ConfirmeDeletion>
+                                </>
 
-                        }
-                    </div>
+                            }
+                        </div>
+                    }
+
                 </Stack>
             }
 

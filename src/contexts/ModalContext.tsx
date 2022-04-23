@@ -25,16 +25,20 @@ export const ModalProvider: React.FC<{}> = ({ children }) => {
 }
 
 export const MyModal: React.FC<{}> = ({ children }) => {
-    const { isopen,toggleModal } = useContext(ModalContext)
+    const { isopen, toggleModal } = useContext(ModalContext)
     return (
+
         <Dialog
             open={isopen}
             onClose={() => toggleModal(false)}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
+            fullWidth
         >
             {children}
         </Dialog>
+
+
     )
 
 }
@@ -42,9 +46,9 @@ export const MyModal: React.FC<{}> = ({ children }) => {
 export const OpenModal: React.FC<{}> = ({ children }) => {
     const { toggleModal } = useContext(ModalContext)
     return (
-        <Box onClick={() => toggleModal(true)} sx={{width:'100%', flexGrow:1}}>
+        <div onClick={() => toggleModal(true)} >
             {children}
-        </Box>
+        </div>
     )
 }
 export const CloseModal: React.FC<{}> = ({ children }) => {
