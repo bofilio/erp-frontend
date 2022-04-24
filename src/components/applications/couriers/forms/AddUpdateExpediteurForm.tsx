@@ -54,7 +54,6 @@ export const AddUpdateExpediteurForm: React.FC<AddUpdateFormProps> = (props) => 
         validationSchema: validationSchema,
         enableReinitialize: true,
         onSubmit: (values: ExpediteurType) => {
-            console.log(values);
             switch (operation) {
                 case "insert":
                     insertMutation.mutate(values)

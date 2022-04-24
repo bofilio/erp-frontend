@@ -7,39 +7,33 @@ import { CloseModal, ModalContext, ModalProvider, MyModal, OpenModal } from '../
 import AutoFixNormalOutlinedIcon from '@mui/icons-material/AutoFixNormalOutlined';
 import AttachmentIcon from '@mui/icons-material/Attachment';
 import FilePresentIcon from '@mui/icons-material/FilePresent';
-import { modelType } from '../../../../DAL/common/query';
 import { AddModelInstance, UpdateModelInstance } from './add_update_model';
 import { AddUpdateAttchmentForm } from '../../couriers/forms/AddUpdateAttchmentForm';
 import { AlertContext } from '../../../../contexts';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { ConfirmeDeletion } from '../../../util';
+import { applicationType, modelType } from '../../../../DAL/types';
 
 
 
 type AttachmentProps = {
     id_parent: string;
-    model: modelType
+    application:applicationType;
+    model: modelType;
+    attachements:any;
+    QUERY_NAME:any;
 }
 
 export const Attachments = (props: AttachmentProps) => {
     const [queryHasChanged, setQueryHasChanged] = useState(false)
     const { setAlert } = useContext(AlertContext)
-    const { id_parent, model } = props
-    const ATTACHMENTS_QUERY_KEYS = `${id_parent}_attchments`
+    const { id_parent,application, model,attachements,QUERY_NAME } = props
     const queryClient = useQueryClient()
-    const { isLoading, error, data: attchements } = useQuery(ATTACHMENTS_QUERY_KEYS, () => API.filter({
-        methode: "GET",
-        application: "couriers",
-        model: model,
-        params: {
-            id_parent: id_parent
-        }
-    }))
 
     const deleteAttachment = (id: any) => {
         API.delete_one({
             methode: "DELETE",
-            application: "couriers",
+            application: application,
             model: model,
             params: {
                 id: id
@@ -48,13 +42,13 @@ export const Attachments = (props: AttachmentProps) => {
             setQueryHasChanged(true)
             setAlert({ status: "success", message: "fichier supprimé" })
         }).catch(err => {
-            setAlert({ status: "error", message: "erreur de supprission" })
+            setAlert({ status: "error", message: err.message })
         })
     }
 
     useEffect(() => {
         if (queryHasChanged) {
-            queryClient.invalidateQueries(ATTACHMENTS_QUERY_KEYS)
+            queryClient.invalidateQueries(QUERY_NAME)
             setQueryHasChanged(false)
         }
     }, [queryHasChanged === true])
@@ -65,15 +59,15 @@ export const Attachments = (props: AttachmentProps) => {
                 Fichiers attachés:
             </Typography>
 
-            {!attchements?.length ?
+            {!QUERY_NAME?.length ?
                 <div style={{ padding: "0.5rem" }}>
                     <Typography variant='caption' sx={{}}> Pas de fichiers attachés à ce couriers</Typography>
                 </div>
 
                 :
                 <Stack gap={1} sx={{ marginBottom: 1 }} >
-                    {
-                        attchements.map((file: any) => (
+                    {attachements&&
+                        attachements.map((file: any) => (
                             <Card key={file.id}>
                                 <ListItem
                                     secondaryAction={
@@ -94,6 +88,7 @@ export const Attachments = (props: AttachmentProps) => {
                                                     <UpdateModelInstance
                                                         value={file}
                                                         onceDone={() => setQueryHasChanged(true)}
+                                                        application={application}
                                                         model={model}
                                                         formComponent={<AddUpdateAttchmentForm />}
                                                         extra_headers={{ 'Content-Type': 'multipart/form-data' }}
@@ -136,6 +131,7 @@ export const Attachments = (props: AttachmentProps) => {
                 <MyModal>
                     <AddModelInstance
                         onceDone={() => setQueryHasChanged(true)}
+                        application={application}
                         model={model}
                         formComponent={<AddUpdateAttchmentForm id_parent={id_parent} />}
                         extra_headers={{ 'Content-Type': 'multipart/form-data' }}

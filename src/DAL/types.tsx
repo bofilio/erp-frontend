@@ -4,6 +4,7 @@ import { GrhModels } from "./grh/types";
 
 export type modelType=CouriesModels | GrhModels;
 export type applicationType="couriers" | "grh" | "common";
+
 export type endPointType = {
     methode: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
     application?: applicationType
@@ -16,6 +17,16 @@ export type endPointType = {
     extra_headers?: any,
 }
 
+export type EmailBodyType = {
+    subject: string;
+    message:string;
+    source: string;
+    to: string[],
+    cc?: string[]
+    attachments?:string[] 
+}
+
+
 export interface IApis {
     get_all(endpoint: endPointType): Promise<any>;
     filter(endpoint: endPointType): Promise<any>;
@@ -23,6 +34,7 @@ export interface IApis {
     create_one(endpoint: endPointType): Promise<any>;
     update_one(endpoint: endPointType): Promise<any>;
     delete_one(endpoint: endPointType): Promise<any>;
+    send_email(emailBody: EmailBodyType): Promise<any>;
     login(endpoint: endPointType): Promise<any>;
     logout(endpoint: endPointType): Promise<any>;
 }

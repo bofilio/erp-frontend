@@ -32,7 +32,6 @@ export const AddUpdateAttchmentForm: React.FC<AddUpdateFormProps> = (props) => {
             formData.append("file", values.file);
             formData.append("name", values.file?.name || values.name);
             formData.append("courier", values.courier);
-            
             switch (operation) {
                 case "insert":
                     insertMutation.mutate(formData)

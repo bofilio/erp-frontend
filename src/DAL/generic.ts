@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { userType, USER_KEY } from "../contexts";
 import { baseURL } from "./config";
-import { endPointType, IApis } from "./types";
+import { EmailBodyType, endPointType, IApis } from "./types";
 
 export function getHeaders() {
     const user_str = localStorage.getItem(USER_KEY)
@@ -158,6 +158,22 @@ export class Apis implements IApis {
         try {
             const response = await axios.delete(`${baseURL}/${application}/${model}s/${params.id}`, {
                 headers: getHeaders(),
+            })
+            return response.data
+        } catch (err: any) {
+            throw new Error(
+                JSON.stringify(
+                    {
+                        data: err.response.data,
+                        status: err.response.status
+                    }
+                ));
+        }
+    }
+    async send_email(emailBody: EmailBodyType): Promise<any> {
+        try {
+            const response = await axios.post(`${baseURL}/commun/sendmail`, emailBody, {
+                headers: {...getHeaders()},
             })
             return response.data
         } catch (err: any) {

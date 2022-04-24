@@ -7,7 +7,7 @@ import { DatePicker } from '@mui/lab';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { API } from '../../DAL/generic';
 import { CourierType } from '../../DAL/couriers/types';
-import { AlertContext } from '../../contexts';
+import { AlertContext, LoadingContext } from '../../contexts';
 import SendIcon from '@mui/icons-material/Send';
 import { Attachments } from '../../components/applications/common/abstraction/attachments';
 import { getSelectedValue, getSelectedValues } from '../../helpers';
@@ -37,88 +37,14 @@ const validationSchema = Yup.object({
 const index = () => {
   const queryClient = useQueryClient()
   const { setAlert } = useContext(AlertContext)
+  const { setLoading } = useContext(LoadingContext)
+  const [operation, setOperation] = useState("insert" as operationType)
+  /**Query names for caching */
   const COURIERS_QUERY_KEY = "couriers"
   const EXPEDITEURS_QUERY_KEY = "expediteurs"
   const TYPES_COURIERS_QUERY_KEY = "types_couriers"
   const CLASSIFICATION_QUERY_KEY = "classifications"
   const STATUS_COURIER_QUERY_KEY = "status"
-  const { isLoading: courierLoading, error: couriersError, data: couriers } = useQuery<boolean, Error, CourierType[]>(COURIERS_QUERY_KEY, () => API.get_all({
-    methode: "GET",
-    application: "couriers",
-    model: "courier",
-  }), { retry: false })
-  const { isLoading: exp_Loading, error: exp_error, data: expediteurs } = useQuery<boolean, Error, any>(EXPEDITEURS_QUERY_KEY, () => API.get_all({
-    methode: "GET",
-    application: "couriers",
-    model: "expediteur",
-  }), { retry: false })
-  const { isLoading: type_courier_Loading, error: type_courier_error, data: types_couriers } = useQuery(TYPES_COURIERS_QUERY_KEY, () => API.get_all({
-    methode: "GET",
-    application: "couriers",
-    model: "types_courier",
-  }), { retry: false })
-  const { isLoading: classification_Loading, error: classification_error, data: classifications } = useQuery(CLASSIFICATION_QUERY_KEY, () => API.get_all({
-    methode: "GET",
-    application: "couriers",
-    model: "classification",
-  }), { retry: false })
-  const { isLoading: statu_Loading, error: statu_error, data: status } = useQuery("status", () => API.get_all({
-    methode: "GET",
-    application: "couriers",
-    model: "statu",
-  }), { retry: false })
-
-  const insertCourierMutation = useMutation((data: CourierType) => API.create_one({
-    methode: "POST",
-    application: "couriers",
-    model: "courier",
-    data: data
-  }), {
-    onSuccess: (data) => {
-      setAlert({ status: "success", message: "le courier a été Enregisteré" })
-      formik.setValues(data)
-      queryClient.invalidateQueries(COURIERS_QUERY_KEY)
-      setOperation("update")
-    },
-    onError: () => {
-      setAlert({ status: "error", message: "Erreur de sauvgard du courier!" })
-    }
-  })
-  const updateCourierMutation = useMutation((data: CourierType) => API.update_one({
-    methode: "PUT",
-    application: "couriers",
-    model: "courier",
-    params: { id: data.id },
-    data: data
-  }), {
-    onSuccess: () => {
-      setAlert({ status: "success", message: "le courier a été modifié" })
-      queryClient.invalidateQueries(COURIERS_QUERY_KEY)
-    },
-    onError: () => {
-      setAlert({ status: "error", message: "Erreur de modification du courier!" })
-    }
-  })
-  const deleteCouriers = (id?: string) => {
-    if (!id) return
-    API.delete_one({
-      methode: "DELETE",
-      application: "couriers",
-      model: "courier",
-      params: {
-        id: id
-      }
-    }).then(res => {
-      setAlert({ status: "success", message: "supprimé " })
-      queryClient.invalidateQueries(COURIERS_QUERY_KEY)
-      formik.setValues(initialValues)
-    }).catch(err => {
-      setAlert({ status: "error", message: "vous ne pouvez pas supprimer ce courier, il se peut qu'il est utilisé comme réponse à un autre courier . oOu vous n'avez pas les autorisations pour le supprimer " })
-    })
-  }
-
-  const [operation, setOperation] = useState("insert" as operationType)
-
 
   const formik = useFormik({
     initialValues: initialValues,
@@ -137,13 +63,131 @@ const index = () => {
     },
   });
 
+  const { isLoading: courierLoading, error: couriersError, data: couriers } = useQuery<boolean, Error, CourierType[]>(COURIERS_QUERY_KEY, () => API.get_all({
+    methode: "GET",
+    application: "couriers",
+    model: "courier",
+  }), { retry: false })
+  const { isLoading: exp_Loading, error: exp_error, data: expediteurs } = useQuery<boolean, Error, any>(EXPEDITEURS_QUERY_KEY, () => API.get_all({
+    methode: "GET",
+    application: "couriers",
+    model: "expediteur",
+  }), { retry: false })
 
-  useEffect(() => {
-    if (couriersError != null) {
-      const error = JSON.parse(couriersError.message)
-      setAlert({ status: "error", message: error.data.detail })
+  const { isLoading: type_courier_Loading, error: type_courier_error, data: types_couriers } = useQuery<boolean, Error, any>(TYPES_COURIERS_QUERY_KEY, () => API.get_all({
+    methode: "GET",
+    application: "couriers",
+    model: "types_courier",
+  }), { retry: false })
+  const { isLoading: classification_Loading, error: classification_error, data: classifications } = useQuery<boolean, Error, any[]>(CLASSIFICATION_QUERY_KEY, () => API.get_all({
+    methode: "GET",
+    application: "couriers",
+    model: "classification",
+  }), { retry: false })
+  const { isLoading: statu_Loading, error: statu_error, data: status } = useQuery<boolean, Error, any[]>("status", () => API.get_all({
+    methode: "GET",
+    application: "couriers",
+    model: "statu",
+  }), { retry: false })
+
+  const ATTACHMENTS_QUERY_KEYS = ["courier_attachments", formik.values.id]
+  const { isLoading: loadingFiles, error: filesError, data: attachements } = useQuery<boolean, Error, any[]>(ATTACHMENTS_QUERY_KEYS, () => API.filter({
+    methode: "GET",
+    application: "couriers",
+    model: "attachment",
+    params: {
+      id_parent: formik.values.id
     }
-  }, [couriersError])
+  }), { enabled: Boolean(formik.values.id) })
+
+  /**insert courier mutation */
+  const insertCourierMutation = useMutation((data: CourierType) => API.create_one({
+    methode: "POST",
+    application: "couriers",
+    model: "courier",
+    data: data
+  }), {
+    onSuccess: (data) => {
+      setAlert({ status: "success", message: "le courier a été Enregisteré" })
+      formik.setValues(data)
+      queryClient.invalidateQueries(COURIERS_QUERY_KEY)
+      setOperation("update")
+    },
+    onError: () => {
+      setAlert({ status: "error", message: "Erreur de sauvgard du courier!" })
+    }
+  })
+  /**update courier mutation */
+  const updateCourierMutation = useMutation((data: CourierType) => API.update_one({
+    methode: "PUT",
+    application: "couriers",
+    model: "courier",
+    params: { id: data.id },
+    data: data
+  }), {
+    onSuccess: () => {
+      setAlert({ status: "success", message: "le courier a été modifié" })
+      queryClient.invalidateQueries(COURIERS_QUERY_KEY)
+    },
+    onError: () => {
+      setAlert({ status: "error", message: "Erreur de modification du courier!" })
+    }
+  })
+  /**delete courier function */
+  const deleteCouriers = (id?: string) => {
+    if (!id) return
+    API.delete_one({
+      methode: "DELETE",
+      application: "couriers",
+      model: "courier",
+      params: {
+        id: id
+      }
+    }).then(res => {
+      setAlert({ status: "success", message: "supprimé " })
+      queryClient.invalidateQueries(COURIERS_QUERY_KEY)
+      formik.setValues(initialValues)
+    }).catch(err => {
+      setAlert({ status: "error", message: "vous ne pouvez pas supprimer ce courier, il se peut qu'il est utilisé comme réponse à un autre courier . oOu vous n'avez pas les autorisations pour le supprimer " })
+    })
+  }
+  /**send courier by mail */
+  const sendCourierByMail = async () => {
+    const courier = formik.values
+    if (!courier.id) return
+    if (!courier.visible_a) return
+    setLoading(true)
+    const sender = await API.get_one({
+      methode: "GET",
+      application: "couriers",
+      model: "expediteur",
+      params: { id: courier.expediteur }
+    })
+    const sendto = await API.filter({
+      methode: "GET",
+      application: "couriers",
+      model: "expediteur",
+      params: { ids: courier.visible_a.toString() }
+    })
+
+    if (sender && sendto) {
+      try {
+        await API.send_email({
+          subject: "Courier pour vous",
+          message: courier.objet,
+          source: sender.email,
+          to: sendto.map((element: any) => element.email),
+          attachments: attachements?.map((attachment: any) => attachment.name)
+        })
+        setAlert({status:"success",message:"email envoyé"})
+      }catch(err){
+        setAlert({status:"error",message:"Erreur d'envoie"})
+      }
+      
+    }
+    setLoading(false)
+  }
+
 
   const OnSelectionChange = (id: any) => {
     const selectedCourier = couriers?.filter((item: any) => item.id === id)[0]
@@ -156,6 +200,41 @@ const index = () => {
     formik.resetForm()
     setOperation("insert")
   }
+  useEffect(() => {
+    setLoading(courierLoading || exp_Loading || type_courier_Loading || classification_Loading || statu_Loading)
+  }, [courierLoading, exp_Loading, type_courier_Loading, classification_Loading, statu_Loading])
+
+  useEffect(() => {
+    if (couriersError != null) {
+      const error = JSON.parse(couriersError.message)
+      setAlert({ status: "error", message: error.data.detail })
+      return
+    }
+    if (exp_error != null) {
+      const error = JSON.parse(exp_error.message)
+      setAlert({ status: "error", message: error.data.detail })
+      return
+    }
+    if (type_courier_error != null) {
+      const error = JSON.parse(type_courier_error.message)
+      setAlert({ status: "error", message: error.data.detail })
+      return
+    }
+    if (classification_error != null) {
+      const error = JSON.parse(classification_error.message)
+      setAlert({ status: "error", message: error.data.detail })
+      return
+    }
+    if (statu_error != null) {
+      const error = JSON.parse(statu_error.message)
+      setAlert({ status: "error", message: error.data.detail })
+      return
+    }
+  }, [couriersError, exp_error, type_courier_error, classification_error, statu_error])
+
+
+
+
   if (couriersError !== null) return (
     <div>ERROR</div>
   )
@@ -389,7 +468,7 @@ const index = () => {
 
             <Divider />
             <div>
-              {formik.values?.id && <Attachments model='attachment' id_parent={formik.values?.id} />}
+              {formik.values?.id && <Attachments application='couriers' model='attachment' attachements={attachements} QUERY_NAME={ATTACHMENTS_QUERY_KEYS} id_parent={formik.values?.id} />}
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -399,7 +478,7 @@ const index = () => {
                 </Button>
                 {formik.values?.id &&
                   <>
-                    <Button color="primary" variant="contained" endIcon={<SendIcon />} >
+                    <Button color="primary" variant="contained" endIcon={<SendIcon />} onClick={sendCourierByMail} >
                       Envoyer par Mail
                     </Button>
                     {/**delete ibuttun with confirmation context */}
