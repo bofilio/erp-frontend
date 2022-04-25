@@ -1,15 +1,21 @@
-import { styled } from '@mui/material/styles';
 import { Box, Divider, Paper, Stack, Typography } from '@mui/material';
 import type { NextPage } from 'next'
-import { AuthenticatedGuard } from '../components/guards'
 import { ApplicationCard } from '../components/content/common';
 import GroupAddOutlinedIcon from '@mui/icons-material/GroupAddOutlined';
 import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 import Link from 'next/link';
+import React,{ useEffect,useContext } from 'react';
+import { CurrentAppContext } from '../contexts';
 
 
 
 const Home: NextPage = () => {
+
+  const { setCurrentApp } = useContext(CurrentAppContext)
+  useEffect(()=>{
+    setCurrentApp(null)
+  },[])
+  
   return (
     
       <Box sx={{ padding: 2 }}>

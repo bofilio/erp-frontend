@@ -7,7 +7,7 @@ import type { AppProps } from 'next/app'
 import { Layout } from '../components/layout';
 import { ThemeProvider } from '@mui/material/styles';
 import { theme1 } from '../settings/theme';
-import { AlertProvider, AuthProvider } from '../contexts';
+import { AlertProvider, AuthProvider, CurrentAppProvider } from '../contexts';
 import { LoadingProvider } from '../contexts';
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools'
@@ -34,9 +34,11 @@ function MyApp({ Component, pageProps }: AppProps) {
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <LoadingProvider>
                 <AlertProvider>
-                  <Layout>
+                  <CurrentAppProvider>
+                    <Layout>
                     <Component {...pageProps} />
                   </Layout>
+                  </CurrentAppProvider>
                 </AlertProvider>
               </LoadingProvider>
             </LocalizationProvider>

@@ -7,7 +7,7 @@ import { DatePicker } from '@mui/lab';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { API } from '../../DAL/generic';
 import { CourierType } from '../../DAL/couriers/types';
-import { AlertContext, LoadingContext } from '../../contexts';
+import { AlertContext, LoadingContext,CurrentAppContext } from '../../contexts';
 import SendIcon from '@mui/icons-material/Send';
 import { Attachments } from '../../components/applications/common/abstraction/attachments';
 import { getSelectedValue, getSelectedValues } from '../../helpers';
@@ -38,6 +38,7 @@ const index = () => {
   const queryClient = useQueryClient()
   const { setAlert } = useContext(AlertContext)
   const { setLoading } = useContext(LoadingContext)
+  const { setCurrentApp } = useContext(CurrentAppContext)
   const [operation, setOperation] = useState("insert" as operationType)
   /**Query names for caching */
   const COURIERS_QUERY_KEY = "couriers"
@@ -200,6 +201,10 @@ const index = () => {
     formik.resetForm()
     setOperation("insert")
   }
+
+  useEffect(()=>{
+    setCurrentApp("couriers")
+  },[])
   useEffect(() => {
     setLoading(courierLoading || exp_Loading || type_courier_Loading || classification_Loading || statu_Loading)
   }, [courierLoading, exp_Loading, type_courier_Loading, classification_Loading, statu_Loading])
