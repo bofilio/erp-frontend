@@ -7,7 +7,7 @@ import { DatePicker } from '@mui/lab';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { API } from '../../DAL/generic';
 import { CourierType } from '../../DAL/couriers/types';
-import { AlertContext, LoadingContext,CurrentAppContext } from '../../contexts';
+import { AlertContext, LoadingContext, CurrentAppContext } from '../../contexts';
 import SendIcon from '@mui/icons-material/Send';
 import { Attachments } from '../../components/applications/common/abstraction/attachments';
 import { getSelectedValue, getSelectedValues } from '../../helpers';
@@ -31,6 +31,18 @@ const validationSchema = Yup.object({
   date_arrivee: Yup.date().required("La date d'arrivée ne peut pas etre vide!"),
   date_expedition: Yup.date().required("La date d'arrivée ne peut pas etre vide!"),
   expediteur: Yup.string().required("Vous devez préciser l'expéditeur de ce courier!"),
+  type: Yup.string().required("Vous devez préciser le type de ce courier!"),
+  classification: Yup.string().required("Vous devez préciser la classification de ce courier!"),
+  destinataires: Yup.array().nullable().min(1,("Vous devez au moins selectionner un distinataire")),
+  visible_a: Yup.array().nullable().when("destinataires", (destinataires: string[], schema: any): any => {
+    return schema.test({
+      test: (visible_a: string[]) => {
+        if (!visible_a) return true
+        return visible_a.every(val => destinataires?.includes(val))
+      },
+      message: "Le courier ne peut etre visible que pour un sous ensemble des destinataires"
+    })
+  }),
 });
 
 
@@ -119,13 +131,16 @@ const index = () => {
     }
   })
   /**update courier mutation */
-  const updateCourierMutation = useMutation((data: CourierType) => API.update_one({
+  const updateCourierMutation = useMutation((data: CourierType) => {
+    console.log(data);
+    
+    return API.update_one({
     methode: "PUT",
     application: "couriers",
     model: "courier",
     params: { id: data.id },
     data: data
-  }), {
+  })}, {
     onSuccess: () => {
       setAlert({ status: "success", message: "le courier a été modifié" })
       queryClient.invalidateQueries(COURIERS_QUERY_KEY)
@@ -180,11 +195,11 @@ const index = () => {
           to: sendto.map((element: any) => element.email),
           attachments: attachements?.map((attachment: any) => attachment.name)
         })
-        setAlert({status:"success",message:"email envoyé"})
-      }catch(err){
-        setAlert({status:"error",message:"Erreur d'envoie"})
+        setAlert({ status: "success", message: "email envoyé" })
+      } catch (err) {
+        setAlert({ status: "error", message: "Erreur d'envoie" })
       }
-      
+
     }
     setLoading(false)
   }
@@ -202,9 +217,9 @@ const index = () => {
     setOperation("insert")
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     setCurrentApp("couriers")
-  },[])
+  }, [])
   useEffect(() => {
     setLoading(courierLoading || exp_Loading || type_courier_Loading || classification_Loading || statu_Loading)
   }, [courierLoading, exp_Loading, type_courier_Loading, classification_Loading, statu_Loading])
@@ -534,6 +549,6 @@ const initialValues: CourierType = {
   reponse: "",
   instructions: "",
   status: "",
-  destinataires: null,
-  visible_a: null,
+  destinataires: [],
+  visible_a: [],
 }

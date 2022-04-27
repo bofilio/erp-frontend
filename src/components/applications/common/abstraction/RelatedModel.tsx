@@ -63,7 +63,7 @@ export const RelatedModel: React.FC<RelatedModelProps> = (props) => {
                         sx={{ flexGrow: 1 }}
                         getOptionLabel={getOptionLabel}
                         value={value}
-                        onChange={(e, vals: any) => formik.setFieldValue(variableName, multiple ? vals?.map((val: any) => val.id) : vals?.id || null)}
+                        onChange={(e, vals: any) => formik.setFieldValue(variableName, multiple ?vals?.map((val: any) => val.id) : vals?.id || null)}
                         onBlur={formik.handleBlur}
                         renderInput={
                             (params: any) =>

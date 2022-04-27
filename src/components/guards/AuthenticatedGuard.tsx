@@ -6,7 +6,6 @@ export const AuthenticatedGuard: FC<{}> = (props) => {
     const router = useRouter()
     const { children } = props
     const { currentUser } = useContext(AuthContext)
-    console.log(currentUser);
     
     useEffect(()=>{
         if(currentUser===null) router.push("/auth/login")
