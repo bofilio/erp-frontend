@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { useAuth } from '../../hooks/auth';
 import { useRouter } from 'next/router'
 import { AlertContext, AuthContext, LoadingContext } from '../../contexts';
+import { auth_routes } from '../../components/applications/auth/routes';
 
 
 
@@ -40,6 +41,7 @@ const Login: NextPage = () => {
     };
     React.useEffect(() => {
         if (currentUser !== null) router.push('/')
+        else router.push(auth_routes.login)
     }, [currentUser])
 
     return (

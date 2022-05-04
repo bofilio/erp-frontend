@@ -26,8 +26,8 @@ const columns: GridColDef[] = [
 
 const validationSchema = Yup.object({
   objet: Yup.string().min(10, "Objet doit etre minimum de 10 caractères").required("L'objet ne peut pas etre vide!"),
-  n_enregistrement: Yup.number().min(3, "Objet doit etre minimum de 3 caractères").required("L'enrigstrement local ne peut pas etre vide!"),
-  referance_exp: Yup.number().min(3, "Objet doit etre minimum de 3 caractères").required("L'enrigstrement local ne peut pas etre vide!"),
+  n_enregistrement: Yup.number().min(1, "Numero Enregistrement doit etre > 0").required("L'enrigstrement local ne peut pas etre vide!"),
+  referance_exp: Yup.number().min(1, "Numero Enregistrement doit etre > 0").required("L'enrigstrement local ne peut pas etre vide!"),
   date_arrivee: Yup.date().required("La date d'arrivée ne peut pas etre vide!"),
   date_expedition: Yup.date().required("La date d'arrivée ne peut pas etre vide!"),
   expediteur: Yup.string().required("Vous devez préciser l'expéditeur de ce courier!"),
