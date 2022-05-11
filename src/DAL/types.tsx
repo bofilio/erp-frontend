@@ -37,5 +37,6 @@ export interface IApis {
     send_email(emailBody: EmailBodyType): Promise<any>;
     login(endpoint: endPointType): Promise<any>;
     logout(endpoint: endPointType): Promise<any>;
+    getMe(endpoint: endPointType): Promise<any>;
 }
 

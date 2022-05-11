@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { userType, USER_KEY } from "../contexts";
-import { baseURL } from "./config";
+import { BACKEND_BASE_URL } from "../settings/constants";
 import { EmailBodyType, endPointType, IApis } from "./types";
 
 export function getHeaders() {
@@ -19,7 +19,7 @@ export class Apis implements IApis {
         if (methode !== "POST")
             throw new Error("HTTP Method not supported!.");
         try {
-            const response = await axios.post(`${baseURL}${url}`, data, {
+            const response = await axios.post(`${BACKEND_BASE_URL}${url}`, data, {
                 headers: getHeaders(),
             })
             return response
@@ -38,7 +38,26 @@ export class Apis implements IApis {
         if (methode !== "POST")
             throw new Error("HTTP Method not supported!.");
         try {
-            const response = await axios.post(`${baseURL}${url}`, data, {
+            const response = await axios.post(`${BACKEND_BASE_URL}${url}`, data, {
+                headers: getHeaders(),
+            })
+            return response.data
+        } catch (err: any) {
+            throw new Error(
+                JSON.stringify(
+                    {
+                        data: err.response.data,
+                        status: err.response.status
+                    }
+                ));
+        }
+    }
+    async getMe(endpoint: endPointType): Promise<any> {
+        const { methode, url } = endpoint
+        if (methode !== "GET")
+            throw new Error("HTTP Method not supported!.");
+        try {
+            const response = await axios.get(`${BACKEND_BASE_URL}${url}`, {
                 headers: getHeaders(),
             })
             return response.data
@@ -57,7 +76,7 @@ export class Apis implements IApis {
         if (methode !== "GET")
             throw new Error("HTTP Method not supported!.");
         try {
-            const response = await axios.get(`${baseURL}/${application}/${model}s`, {
+            const response = await axios.get(`${BACKEND_BASE_URL}/${application}/${model}s`, {
                 headers: getHeaders(),
             })
             return response.data
@@ -77,7 +96,7 @@ export class Apis implements IApis {
         if (methode !== "GET")
             throw new Error("HTTP Method not supported!.");
         try {
-            const response = await axios.get(`${baseURL}/${application}/${model}s`, {
+            const response = await axios.get(`${BACKEND_BASE_URL}/${application}/${model}s`, {
                 params: params,
                 headers: getHeaders(),
             })
@@ -97,7 +116,7 @@ export class Apis implements IApis {
         if (methode !== "GET")
             throw new Error("HTTP Method not supported!.");
         try {
-            const response = await axios.get(`${baseURL}/${application}/${model}s/${params.id}`, {
+            const response = await axios.get(`${BACKEND_BASE_URL}/${application}/${model}s/${params.id}`, {
                 headers: getHeaders(),
             })
             return response.data
@@ -117,7 +136,7 @@ export class Apis implements IApis {
         if (methode !== "POST")
             throw new Error("HTTP Method not supported!.");
         try {
-            const response = await axios.post(`${baseURL}/${application}/${model}s/`, data, {
+            const response = await axios.post(`${BACKEND_BASE_URL}/${application}/${model}s/`, data, {
                 headers: { ...getHeaders(), ...extra_headers },
             })
             return response.data
@@ -137,7 +156,7 @@ export class Apis implements IApis {
         if (methode !== "PUT")
             throw new Error("HTTP Method not supported!.");
         try {
-            const response = await axios.put(`${baseURL}/${application}/${model}s/${params.id}/`, data, {
+            const response = await axios.put(`${BACKEND_BASE_URL}/${application}/${model}s/${params.id}/`, data, {
                 headers: { ...getHeaders(), ...extra_headers },
             })
             return response.data
@@ -156,7 +175,7 @@ export class Apis implements IApis {
         if (methode !== "DELETE")
             throw new Error("HTTP Method not supported!.");
         try {
-            const response = await axios.delete(`${baseURL}/${application}/${model}s/${params.id}`, {
+            const response = await axios.delete(`${BACKEND_BASE_URL}/${application}/${model}s/${params.id}`, {
                 headers: getHeaders(),
             })
             return response.data
@@ -172,7 +191,7 @@ export class Apis implements IApis {
     }
     async send_email(emailBody: EmailBodyType): Promise<any> {
         try {
-            const response = await axios.post(`${baseURL}/commun/sendmail`, emailBody, {
+            const response = await axios.post(`${BACKEND_BASE_URL}/commun/sendmail`, emailBody, {
                 headers: {...getHeaders()},
             })
             return response.data

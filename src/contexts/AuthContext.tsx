@@ -1,13 +1,13 @@
 
 import React, { createContext, FC, useEffect, useState } from 'react'
+import { API } from '../DAL/generic';
 
 export const USER_KEY="current_user"
 export type userType = {
     id?: string,
     username: string,
-    fullname?: string,
-    email?:string
     token:string;
+    profile:any;
 }
 export type CurrentUser=userType|null
 
@@ -35,8 +35,9 @@ export const AuthProvider: FC<{}> = ({ children }) => {
     },[])
 
     useEffect(()=>{
+
         if(currentUser!=null){
-            localStorage.setItem(USER_KEY,JSON.stringify(currentUser))
+            localStorage.setItem(USER_KEY,JSON.stringify(currentUser)) 
         }
         else{
            localStorage.removeItem(USER_KEY) 

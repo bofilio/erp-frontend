@@ -132,8 +132,6 @@ const index = () => {
   })
   /**update courier mutation */
   const updateCourierMutation = useMutation((data: CourierType) => {
-    console.log(data);
-    
     return API.update_one({
     methode: "PUT",
     application: "couriers",
@@ -225,27 +223,27 @@ const index = () => {
   }, [courierLoading, exp_Loading, type_courier_Loading, classification_Loading, statu_Loading])
 
   useEffect(() => {
-    if (couriersError != null) {
+    if (couriersError?.message) {
       const error = JSON.parse(couriersError.message)
       setAlert({ status: "error", message: error.data.detail })
       return
     }
-    if (exp_error != null) {
+    if (exp_error?.message) {
       const error = JSON.parse(exp_error.message)
       setAlert({ status: "error", message: error.data.detail })
       return
     }
-    if (type_courier_error != null) {
+    if (type_courier_error?.message) {
       const error = JSON.parse(type_courier_error.message)
       setAlert({ status: "error", message: error.data.detail })
       return
     }
-    if (classification_error != null) {
+    if (classification_error?.message) {
       const error = JSON.parse(classification_error.message)
       setAlert({ status: "error", message: error.data.detail })
       return
     }
-    if (statu_error != null) {
+    if (statu_error?.message) {
       const error = JSON.parse(statu_error.message)
       setAlert({ status: "error", message: error.data.detail })
       return

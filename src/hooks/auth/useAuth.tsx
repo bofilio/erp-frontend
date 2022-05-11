@@ -30,7 +30,7 @@ export const useAuth = () => {
                         password: payload.password
                     }
                 }).then(res => {
-                    setAuthState({ isLoading: false, data: res.data, error: null })
+                    setAuthState({ isLoading: false, data: res.data, error: null })                 
                     setCurrentUser({
                         username:payload.username,
                         token:res.data.access,

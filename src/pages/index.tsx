@@ -6,6 +6,7 @@ import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 import Link from 'next/link';
 import React,{ useEffect,useContext } from 'react';
 import { CurrentAppContext } from '../contexts';
+import { HomeDashbord } from '../components/content/home-dashbord';
 
 
 
@@ -46,6 +47,7 @@ const Home: NextPage = () => {
 
         </Stack>
         <Divider />
+        <HomeDashbord/>
       </Box>
 
    
