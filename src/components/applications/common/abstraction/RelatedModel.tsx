@@ -21,7 +21,7 @@ type RelatedModelProps = {
     appliation: applicationType;
     model: modelType;
     getOptionLabel: (option: any) => string;
-    QUERY_KEYS: string;
+    QUERY_KEYS: any;
     InsertUpdateForm?: JSX.Element;
 }
 export const RelatedModel: React.FC<RelatedModelProps> = (props) => {

@@ -15,6 +15,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/404.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/404.js", "src/components/content/home-dashbord/charts"],
   "exclude": ["node_modules"]
 }

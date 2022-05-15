@@ -11,7 +11,7 @@ type StatProps = {
 }
 export const Stat: React.FC<StatProps> = (props) => {
     const { title, value, compareToValue } = props
-
+    
     const calcPercentage = () => {
         return Math.floor((value - compareToValue) / value * 100)+"%"
     }
@@ -29,7 +29,7 @@ export const Stat: React.FC<StatProps> = (props) => {
                 p: 2,
                 borderLeft:1,
                 borderColor: value > compareToValue ? 'success.dark' : 'error.dark',
-
+                borderWidth:3
             }}
         >
             <Box sx={{ color: 'text.secondary' }}>{title}</Box>
@@ -55,4 +55,10 @@ export const Stat: React.FC<StatProps> = (props) => {
             </Box>
         </Box>
     )
+}
+
+
+
+function round(value:number,offset:number){
+    return Math.round(value*100)/100
 }

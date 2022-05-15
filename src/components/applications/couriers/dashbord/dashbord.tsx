@@ -1,5 +1,6 @@
 import { Card, Grid } from '@mui/material'
 import React from 'react'
+import { Example } from './charts'
 
 export const DashbordCouriers = () => {
     return (
