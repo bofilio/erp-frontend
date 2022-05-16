@@ -46,7 +46,7 @@ export const NavBarContent = ({ handleDrawerToggle }: any) => {
                 </Box>
                 {currentUser &&
                     <Stack direction="row" alignItems="center" spacing={3}>
-                        {
+                        { currentUser.profile?.is_staff &&
                             <Typography variant="button">
                                 <a href={ADMIN_URL} target="_blank">
                                     Administration

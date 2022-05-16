@@ -7,7 +7,7 @@ import Head from 'next/head'
 import { NavBarContent } from './NavBarContent'
 import { SideBarContent } from './SideBarContent';
 import { MainContent } from './MainContent';
-import { Alert, Snackbar, useTheme } from '@mui/material';
+import { Alert, Snackbar, Stack, useTheme } from '@mui/material';
 import { AlertContext, AuthContext, LoadingContext } from '../../contexts';
 import { LoadingTransaction } from '../util';
 const drawerWidth = 240;
@@ -16,14 +16,9 @@ const drawerWidth = 240;
 
 
 export const Layout: React.FC<{}> = (props) => {
-    const { alert, setAlert } = useContext(AlertContext)
     const { children } = props;
     const { currentUser } = useContext(AuthContext)
-    const theme = useTheme();
-    const [mobileOpen, setMobileOpen] = React.useState(false);
-    const handleDrawerToggle = () => {
-        setMobileOpen(!mobileOpen);
-    };
+    const { alert, setAlert } = useContext(AlertContext)
 
     return (
         <>
@@ -49,22 +44,10 @@ export const Layout: React.FC<{}> = (props) => {
                     {children}
                 </div>
                 :
-                <Box sx={{ display: 'flex', paddingTop: 8 }}>
-                    <CssBaseline />
-                    <AppBar
-                        position="fixed"
-                        sx={{
-                            width: { sm: `calc(100% - ${drawerWidth}px)` },
-                            ml: { sm: `${drawerWidth}px` },
-                            height: 64,
-                        }}
-                    >
-                        <NavBarContent />
-                    </AppBar>
-
+                <Stack direction="row">
                     <Box
                         component="nav"
-                        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+                        sx={{ width: drawerWidth, flexShrink: 0 }}
                         aria-label="mailbox folders"
 
                     >
@@ -80,16 +63,33 @@ export const Layout: React.FC<{}> = (props) => {
                             <SideBarContent />
                         </Drawer>
                     </Box>
+                    <Stack flexGrow={1}>
+                        <AppBar
+                            position="fixed"
+                            sx={{
+                                width:  `calc(100% - ${drawerWidth}px)`,
+                                right:0,
+                                height: 64,
+                            }}
+                        >
+                            <NavBarContent />
+                        </AppBar>
 
-                    <Box
-                        component="main"
-                        sx={{ flexGrow: 1, width: { sm: `calc(100% - ${drawerWidth}px)` }, }}
-                    >
-                        <MainContent>
-                            {children}
-                        </MainContent>
-                    </Box>
-                </Box>
+                        <Box
+                            component="main"
+                            sx={{ flexGrow: 1, width: '100%',marginTop:8 }}
+                        >
+                            <MainContent>
+                                {children}
+                            </MainContent>
+                        </Box>
+                    </Stack>
+
+
+
+
+
+                </Stack>
 
             }
 

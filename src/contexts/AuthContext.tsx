@@ -1,15 +1,26 @@
 
-import React, { createContext, FC, useEffect, useState } from 'react'
+import { useRouter } from 'next/router';
+import React, { createContext, FC, useEffect, useMemo, useState } from 'react'
+import { useQuery } from 'react-query';
+import { auth_routes } from '../components/applications/auth/routes';
 import { API } from '../DAL/generic';
 
-export const USER_KEY="current_user"
+export const USER_KEY = "current_user"
+
+export type userProfile = {
+    username: string
+    email: string
+    is_superuser: boolean
+    is_staff: boolean
+}
+
 export type userType = {
     id?: string,
     username: string,
-    token:string;
-    profile:any;
+    token: string;
+    profile?: userProfile;
 }
-export type CurrentUser=userType|null
+export type CurrentUser = userType | null
 
 type AlertContextType = {
     currentUser: CurrentUser,
@@ -21,29 +32,38 @@ export const AuthContext = createContext<AlertContextType>({
 })
 
 
+
 export const AuthProvider: FC<{}> = ({ children }) => {
-    const [currentUser, setCurrentUser] = useState(null as CurrentUser)
-    const contextValue = { currentUser, setCurrentUser }
+    const router = useRouter()
+    const [currentUser, setCurrentUser] = useState<CurrentUser>(getCurrentUser())
+    const contextValue = useMemo(() => (
+        { currentUser, setCurrentUser })
+        , [currentUser])
 
-    
-    useEffect(()=>{
-        const saved_current_user:string|null=localStorage.getItem(USER_KEY)
-        if (saved_current_user!=null){
-            setCurrentUser(JSON.parse(saved_current_user))
-        } 
-        
-    },[])
+    const { isLoading, error, data: profile } = useQuery<boolean, Error, userProfile>("userProfile", () => API.getMe({ methode: "GET" }), { retry: false, enabled: currentUser!==null })
 
-    useEffect(()=>{
-
-        if(currentUser!=null){
-            localStorage.setItem(USER_KEY,JSON.stringify(currentUser)) 
+    function getCurrentUser() {
+        if (typeof (window) !== "undefined") {
+            const saved_current_user: string | null = localStorage.getItem(USER_KEY)
+            if (saved_current_user != null) {
+                return JSON.parse(saved_current_user) as CurrentUser
+            }
         }
-        else{
-           localStorage.removeItem(USER_KEY) 
-        }  
-    },[currentUser])
-   
+        return null
+    }
+
+
+
+    useEffect(() => {
+
+        if (currentUser != null) {
+            localStorage.setItem(USER_KEY, JSON.stringify({ ...currentUser, profile: { ...profile } }))
+        }
+        else {
+            localStorage.removeItem(USER_KEY) 
+        }
+    }, [currentUser, profile])
+
     return (
         <AuthContext.Provider value={contextValue}>
             {children}

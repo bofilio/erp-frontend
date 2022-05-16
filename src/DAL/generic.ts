@@ -53,7 +53,7 @@ export class Apis implements IApis {
         }
     }
     async getMe(endpoint: endPointType): Promise<any> {
-        const { methode, url } = endpoint
+        const { methode, url='/auth/users/me' } = endpoint
         if (methode !== "GET")
             throw new Error("HTTP Method not supported!.");
         try {

@@ -14,40 +14,36 @@ import Typography from '@mui/material/Typography';
 import type { NextPage } from 'next'
 import Link from 'next/link';
 import { useAuth } from '../../hooks/auth';
-import { useRouter } from 'next/router'
-import { AlertContext, AuthContext, LoadingContext } from '../../contexts';
-import { auth_routes } from '../../components/applications/auth/routes';
+import { AlertContext, AuthContext, LoadingContext, USER_KEY } from '../../contexts';
+import { useRouter } from 'next/router';
 
 
 
 const Login: NextPage = () => {
     const { authState, dispatch } = useAuth()
-    const {setLoading}= React.useContext(LoadingContext)
-    const {setAlert} = React.useContext(AlertContext)
-    const {isLoading,data,error}=authState
-    React.useEffect(()=>{
+    const { setLoading } = React.useContext(LoadingContext)
+    const { setAlert } = React.useContext(AlertContext)
+    const { isLoading, data, error } = authState
+    React.useEffect(() => {
         setLoading(isLoading)
-        if(error!==null) setAlert({status:"error",message:"username ou mot de pass n'est pas correct!"})
-    },[isLoading,error])
-    
-    const router = useRouter()
+        if (error !== null) setAlert({ status: "error", message: "username ou mot de pass n'est pas correct!" })
+    }, [isLoading, error])
+
     const { currentUser } = React.useContext(AuthContext)
+    const router=useRouter()
 
-
-    const handleSubmit =  (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const form_data = new FormData(event.currentTarget);
-        dispatch({ type: "LOGIN", payload: { username: form_data.get("username"), password: form_data.get('password') } }) 
+        dispatch({ type: "LOGIN", payload: { username: form_data.get("username"), password: form_data.get('password') } })
     };
     React.useEffect(() => {
-        if (currentUser !== null) router.push('/')
-        else router.push(auth_routes.login)
-    }, [currentUser])
-
+        if(currentUser!=null) router.push("/")
+    },[currentUser])
     return (
         <>
             {
-                !currentUser && <Grid container component="main" sx={{ height: '100vh' }}>
+                currentUser === null && <Grid container component="main" sx={{ height: '100vh' }}>
                     <CssBaseline />
                     <Grid
                         item
@@ -98,7 +94,7 @@ const Login: NextPage = () => {
                                     label="Mot de pass"
                                     type="password"
                                     id="password"
-                                    autoComplete="current-password"
+                                    autoComplete="password"
                                 />
                                 <FormControlLabel
                                     control={<Checkbox checked value="remember" color="primary" />}
