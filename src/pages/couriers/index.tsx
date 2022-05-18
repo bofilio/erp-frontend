@@ -45,7 +45,7 @@ const index = () => {
 
         <Stack direction="row" spacing={2}  >
           <Paper sx={{ width: "33%" }}>
-            <DataGrid rows={couriers || []} columns={columns} onSelectionModelChange={(ids) => {
+            <DataGrid rows={couriers || []} columns={columns} onSelectionModelChange={(ids:string[]) => {
               ids && onSelectionChange(ids[0])
             }} />
           </Paper>
@@ -315,10 +315,6 @@ const index = () => {
         </Stack>
       </Stack>
     </main>
-
-
-
-
   )
 }
 

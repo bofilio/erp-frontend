@@ -10,6 +10,8 @@ import { MainContent } from './MainContent';
 import { Alert, Snackbar, Stack, useTheme } from '@mui/material';
 import { AlertContext, AuthContext, LoadingContext } from '../../contexts';
 import { LoadingTransaction } from '../util';
+import { grey } from '@mui/material/colors';
+
 const drawerWidth = 240;
 
 
@@ -19,7 +21,7 @@ export const Layout: React.FC<{}> = (props) => {
     const { children } = props;
     const { currentUser } = useContext(AuthContext)
     const { alert, setAlert } = useContext(AlertContext)
-
+    const theme = useTheme()
     return (
         <div>
             <Head>
@@ -28,27 +30,28 @@ export const Layout: React.FC<{}> = (props) => {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <LoadingTransaction />
-            {
-                <Snackbar
-                    open={Boolean(alert?.message)}
-                    autoHideDuration={15000}
-                    onClose={() => setAlert({ status: "info", message: "" })}
-                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
-                >
-                    <Alert severity={alert?.status} onClose={() => setAlert({ status: "info", message: "" })}>{alert?.message}</Alert>
-                </Snackbar>
-            }
+
+            <Snackbar
+                open={Boolean(alert?.message)}
+                autoHideDuration={15000}
+                onClose={() => setAlert({ status: "info", message: "" })}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            >
+                <Alert severity={alert?.status} onClose={() => setAlert({ status: "info", message: "" })}>{alert?.message}</Alert>
+            </Snackbar>
+
             {currentUser === null ?
 
                 <div>
                     {children}
                 </div>
                 :
-                <Stack direction="row">
-                    <Box
-                        component="nav"
-                        sx={{
-                            width: drawerWidth,
+                <div style={{ display: 'flex' }}>
+                    <div
+                        style={{
+                            width: `${drawerWidth}px`,
+                            border: 1,
+                            backgroundColor: grey[200],
                             flexShrink: 0,
                             height: '100vh',
                             position: "fixed",
@@ -59,13 +62,14 @@ export const Layout: React.FC<{}> = (props) => {
 
                         <SideBarContent />
 
-                    </Box>
-                    <Stack flexGrow={1}>
+                    </div>
+                    <Box sx={{ marginLeft: `${drawerWidth}px`,  }}>
                         <AppBar
                             position="fixed"
                             sx={{
                                 width: `calc(100% - ${drawerWidth}px)`,
                                 right: 0,
+                                top: 0,
                                 height: '64px',
                             }}
                         >
@@ -76,16 +80,15 @@ export const Layout: React.FC<{}> = (props) => {
                             style={{
                                 flexGrow: 1,
                                 marginTop: '64px',
-                                marginLeft: `${drawerWidth}px`
                             }}
                         >
 
                             {children}
 
                         </div>
-                    </Stack>
+                    </Box>
 
-                </Stack>
+                </div>
 
             }
 
