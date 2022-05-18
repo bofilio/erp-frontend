@@ -4,7 +4,6 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import type { AppProps } from 'next/app'
-import { Layout } from '../components/layout';
 import { ThemeProvider } from '@mui/material/styles';
 import { theme1 } from '../settings/theme';
 import { AlertProvider, AuthProvider, CurrentAppProvider } from '../contexts';
@@ -14,6 +13,16 @@ import { ReactQueryDevtools } from 'react-query/devtools'
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import { AuthenticatedGuard } from '../components/guards';
+import dynamic from 'next/dynamic';
+import Script from 'next/script';
+
+const Layout = dynamic(
+  () => import('../components/layout/layout'),
+  { ssr: false }
+)
+
+
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -36,8 +45,12 @@ function MyApp({ Component, pageProps }: AppProps) {
                 <AlertProvider>
                   <CurrentAppProvider>
                     <Layout>
-                    <Component {...pageProps} />
-                  </Layout>
+                      <>
+                        <Script src="/scannerjs/scanner.js"></Script>
+                        <Component {...pageProps} />
+                      </>
+
+                    </Layout>
                   </CurrentAppProvider>
                 </AlertProvider>
               </LoadingProvider>
