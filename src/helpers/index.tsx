@@ -19,3 +19,8 @@ export const dataUrlToFile = async (dataUrl: string, fileName: string): Promise<
 export function getRondomString(length:number){
     return Math.random().toString(36).slice(2, length);
 }
+
+export function parseErrorString(raw_error:string):string{
+    if(!raw_error) return ""
+    return JSON.parse(raw_error)?.data?.detail || "???"
+}

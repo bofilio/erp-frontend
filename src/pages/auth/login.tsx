@@ -2,7 +2,7 @@ import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
+import { TextField } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import MuiLink from '@mui/material/Link';
@@ -16,30 +16,50 @@ import Link from 'next/link';
 import { useAuth } from '../../hooks/auth';
 import { AlertContext, AuthContext, LoadingContext, USER_KEY } from '../../contexts';
 import { useRouter } from 'next/router';
+import { parseErrorString } from '../../helpers';
+import * as Yup from 'yup';
+import { useFormik } from 'formik';
 
 
+const validationSchema = Yup.object({
+    username: Yup.string().required("Svp, saisissez votre nom d'utilisateur "),
+    password: Yup.string().required("Svp, saisissez votre mot de pass ").min(6, "Le mot de pass ne doit pas etre moins de six caractéres"),
+});
+type LoginFormType = {
+    username: string,
+    password: string,
+}
 
 const Login: NextPage = () => {
     const { authState, dispatch } = useAuth()
     const { setLoading } = React.useContext(LoadingContext)
     const { setAlert } = React.useContext(AlertContext)
     const { isLoading, data, error } = authState
+
+    const formik = useFormik<LoginFormType>({
+        initialValues: {
+            username: "",
+            password: ""
+        },
+        validationSchema: validationSchema,
+        enableReinitialize: true,
+        onSubmit: (values: LoginFormType) => {
+            dispatch({ type: "LOGIN", payload: { username: values.username, password: values.password } })
+        },
+    });
+
     React.useEffect(() => {
         setLoading(isLoading)
-        if (error !== null) setAlert({ status: "error", message: "username ou mot de pass n'est pas correct!" })
+        if (error !== null) setAlert({ status: "error", message: parseErrorString(error) })
     }, [isLoading, error])
 
     const { currentUser } = React.useContext(AuthContext)
-    const router=useRouter()
+    const router = useRouter()
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        const form_data = new FormData(event.currentTarget);
-        dispatch({ type: "LOGIN", payload: { username: form_data.get("username"), password: form_data.get('password') } })
-    };
     React.useEffect(() => {
-        if(currentUser!=null) router.push("/")
-    },[currentUser])
+        if (currentUser != null) router.push("/")
+    }, [currentUser])
+
     return (
         <>
             {
@@ -73,33 +93,39 @@ const Login: NextPage = () => {
                                 <LockOutlinedIcon />
                             </Avatar>
                             <Typography component="h1" variant="h5">
-                                Log in
+                                S'identifier
                             </Typography>
-                            <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                            <form onSubmit={formik.handleSubmit} style={{ maxWidth: "512px" }}>
+
                                 <TextField
                                     margin="normal"
-                                    required
                                     fullWidth
                                     id="username"
-                                    label="Username"
+                                    label="Nom d'utilisateur"
                                     name="username"
-                                    autoComplete="username"
                                     autoFocus
+                                    value={formik.values.username}
+                                    onChange={formik.handleChange}
+                                    error={formik.touched.username && Boolean(formik.errors.username)}
+                                    helperText={formik.touched.username && formik.errors.username}
+
                                 />
                                 <TextField
                                     margin="normal"
-                                    required
                                     fullWidth
                                     name="password"
                                     label="Mot de pass"
                                     type="password"
                                     id="password"
-                                    autoComplete="password"
+                                    value={formik.values.password}
+                                    onChange={formik.handleChange}
+                                    error={formik.touched.password && Boolean(formik.errors.password)}
+                                    helperText={formik.touched.password && formik.errors.password}
                                 />
-                                <FormControlLabel
+                                {/*<FormControlLabel
                                     control={<Checkbox checked value="remember" color="primary" />}
                                     label="Rappeler moi"
-                                />
+                                />*/}
                                 <Button
                                     type="submit"
                                     fullWidth
@@ -125,7 +151,9 @@ const Login: NextPage = () => {
                                     </Grid>
                                 </Grid>
 
-                            </Box>
+
+                            </form>
+
                         </Box>
                     </Grid>
                 </Grid>

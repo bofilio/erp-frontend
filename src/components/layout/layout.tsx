@@ -58,11 +58,11 @@ const Layout: React.FC<{}> = (props) => {
                 <Alert severity={alert?.status} onClose={() => setAlert({ status: "info", message: "" })}>{alert?.message}</Alert>
             </Snackbar>
 
-            <div style={{ display:"flex"}} >
+            <div style={{ display: "flex" }} >
                 <Box
                     sx={{
-                        position:"sticky",
-                        top:0,
+                        position: "sticky",
+                        top: 0,
                         width: `${drawerWidth}px`,
                         backgroundColor: grey[200],
                         flexShrink: 0,
@@ -73,9 +73,10 @@ const Layout: React.FC<{}> = (props) => {
                     <SideBarContent />
 
                 </Box>
-                <Box
+                <Stack
                     sx={{
-                        flexGrow:1
+                        flexGrow: 1,
+
                     }}
                 >
 
@@ -83,16 +84,16 @@ const Layout: React.FC<{}> = (props) => {
                         position="sticky"
                         sx={{
                             height: '64px',
-                            top:0,
+                            top: 0,
                         }}
                     >
                         <NavBarContent />
                     </AppBar>
 
-                    <div>
-                        {children}
-                    </div>
-                </Box>
+
+                    {children}
+
+                </Stack>
 
             </div>
 

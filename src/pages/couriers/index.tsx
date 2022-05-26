@@ -1,16 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Box, Button, Checkbox, Divider, FormControlLabel, IconButton, InputBase, MenuItem, Paper, Stack, TextField } from '@mui/material';
+import { Box, Button, Checkbox, Divider, FormControlLabel, IconButton, InputBase, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material';
 import { DatePicker } from '@mui/lab';
 import SendIcon from '@mui/icons-material/Send';
 import { Attachments } from '../../components/applications/common/abstraction/attachments';
-import { getSelectedValue, getSelectedValues } from '../../helpers';
+import { getSelectedValue, getSelectedValues, parseErrorString } from '../../helpers';
 import { RelatedModel } from '../../components/applications/common/abstraction/RelatedModel';
 import { AddUpdateClassificationForm, AddUpdateExpediteurForm, AddUpdateStatutCourierForm, AddUpdateTypeCourierForm } from '../../components/applications/couriers/forms';
 import moment from 'moment';
 import { ConfirmeDeletion } from '../../components/util';
 import { FilterHeader } from '../../components/applications/couriers/headers';
 import { useCouriersStateHandler } from '../../components/applications/couriers/hooks';
+import { AlertContext } from '../../contexts';
 
 
 
@@ -32,12 +33,20 @@ const index = () => {
   const { classifications, CLASSIFICATION_QUERY_KEY } = classificationApi
   const { status, STATUS_COURIER_QUERY_KEY } = statusApi
   const { attachements, ATTACHMENTS_QUERY_KEYS } = attachmentsApi
+  const { setAlert } = React.useContext(AlertContext)
 
-  if (couriersError !== null) return (
-    <div style={{ width: 'vw', height: 'vh', display: "flex", justifyContent: "center", alignItems: "center" }}>
-      Erreur!
-    </div>
-  )
+  if (couriersError !== null) {
+    console.log(couriersError.message);
+    
+    //setAlert({ status: "error", message: parseErrorString(couriersError.message) })
+    return (
+      <div style={{ width: '100%', flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Typography fontSize={24} color="error" >
+          Access Refusé
+        </Typography>
+      </div>
+    )
+  }
   return (
     <main style={{ padding: "16px" }}>
       <Stack spacing={3}>
@@ -45,12 +54,12 @@ const index = () => {
 
         <Stack direction="row" spacing={2}  >
           <Paper sx={{ width: "33%" }}>
-            <DataGrid rows={couriers || []} columns={columns} onSelectionModelChange={(ids:any[]) => {
+            <DataGrid rows={couriers || []} columns={columns} onSelectionModelChange={(ids: any[]) => {
               ids && onSelectionChange(ids[0])
             }} />
           </Paper>
 
-          <Paper sx={{ width: "66%",padding:2 }}>
+          <Paper sx={{ width: "66%", padding: 2 }}>
             <form onSubmit={formik.handleSubmit}>
               <Stack spacing={2}>
                 <TextField

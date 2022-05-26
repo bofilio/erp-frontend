@@ -1,5 +1,5 @@
 import React, { useContext, useReducer, useState } from 'react'
-import { AuthContext, LoadingContext } from '../../contexts'
+import { AuthContext, LoadingContext, USER_KEY } from '../../contexts'
 import { API } from '../../DAL/generic'
 
 type AuthStateType = {
@@ -43,6 +43,7 @@ export const useAuth = () => {
             case "LOGOUT":
                 setCurrentUser(null)
                 setAuthState({ isLoading: false, data: null, error: null })
+                typeof(window)!=="undefined" && localStorage.removeItem(USER_KEY) 
                 break;
             default: return
         }

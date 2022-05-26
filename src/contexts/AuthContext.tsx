@@ -40,11 +40,11 @@ export const AuthProvider: FC<{}> = ({ children }) => {
         { currentUser, setCurrentUser })
         , [currentUser])
 
-    const { isLoading, error, data: profile } = useQuery<boolean, Error, userProfile>("userProfile", () => API.getMe({ methode: "GET" }), { retry: false, enabled: currentUser!==null })
+    const { isLoading, error, data: profile } = useQuery<boolean, Error, userProfile>("userProfile", () => API.getMe({ methode: "GET" }), { retry: false, enabled: currentUser !== null })
 
     function getCurrentUser() {
         if (typeof (window) !== "undefined") {
-            const saved_current_user: string | null = localStorage.getItem(USER_KEY)
+            const saved_current_user = localStorage.getItem(USER_KEY)
             if (saved_current_user != null) {
                 return JSON.parse(saved_current_user) as CurrentUser
             }
@@ -52,17 +52,16 @@ export const AuthProvider: FC<{}> = ({ children }) => {
         return null
     }
 
-
+    console.log(currentUser);
+    
 
     useEffect(() => {
-
-        if (currentUser != null) {
-            localStorage.setItem(USER_KEY, JSON.stringify({ ...currentUser, profile: { ...profile } }))
+        console.log(currentUser);
+        if ( !currentUser?.profile) {
+            setCurrentUser(currentUser => ({ ...currentUser, profile:profile } as CurrentUser))
+            localStorage.setItem(USER_KEY, JSON.stringify({ ...currentUser, profile:profile }))
         }
-        else {
-            localStorage.removeItem(USER_KEY) 
-        }
-    }, [currentUser, profile])
+    }, [profile])
 
     return (
         <AuthContext.Provider value={contextValue}>
