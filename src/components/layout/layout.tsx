@@ -6,7 +6,6 @@ import Drawer from '@mui/material/Drawer';
 import Head from 'next/head'
 import { NavBarContent } from './NavBarContent'
 import { SideBarContent } from './SideBarContent';
-import { MainContent } from './MainContent';
 import { Alert, Snackbar, Stack, useTheme } from '@mui/material';
 import { AlertContext, AuthContext, LoadingContext, USER_KEY } from '../../contexts';
 import { LoadingTransaction } from '../util';
@@ -73,13 +72,7 @@ const Layout: React.FC<{}> = (props) => {
                     <SideBarContent />
 
                 </Box>
-                <Stack
-                    sx={{
-                        flexGrow: 1,
-
-                    }}
-                >
-
+                <Stack sx={{flexGrow: 1, backgroundColor:"#f5f5f5" }}>
                     <AppBar
                         position="sticky"
                         sx={{
@@ -89,7 +82,6 @@ const Layout: React.FC<{}> = (props) => {
                     >
                         <NavBarContent />
                     </AppBar>
-
 
                     {children}
 

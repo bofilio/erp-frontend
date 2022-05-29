@@ -57,6 +57,8 @@ export const useCouriersStateHandler = () => {
     const { setCurrentApp } = useContext(CurrentAppContext)
     const [search, setSearch] = useState("")
     const [operation, setOperation] = useState<operationType>("insert")
+    const [selectedCourierId, setSelectedCourierId] = useState<string | null>(null)
+    const [selectionChanged, setSelectionChanged] = useState(false)
     /**Query names for caching */
     const COURIERS_QUERY_KEY = ["couriers", search]
     const EXPEDITEURS_QUERY_KEY = "expediteurs"
@@ -211,12 +213,27 @@ export const useCouriersStateHandler = () => {
 
 
     const onSelectionChange = (id: any) => {
-        const selectedCourier = couriers?.filter((item: any) => item.id === id)[0]
-        if (selectedCourier) {
-            formik.setValues(selectedCourier)
-            setOperation("update")
-        }
+        setSelectedCourierId(id);
+
     }
+    useEffect(() => {
+        setSelectionChanged(false);
+        let selectedCourier: CourierType | undefined = undefined
+        if (selectedCourierId !== null) {
+            selectedCourier = couriers?.filter((item: any) => item.id === selectedCourierId)[0]
+        }
+        const timer=setTimeout(() => {
+            if (selectedCourier) {
+                formik.setValues(selectedCourier)
+                setOperation("update")
+            }
+            setSelectionChanged(true);
+        }, 200)
+
+        return ()=>{clearTimeout(timer)}
+    }, [selectedCourierId])
+
+
     const resetForm = () => {
         formik.resetForm()
         setOperation("insert")
@@ -274,5 +291,6 @@ export const useCouriersStateHandler = () => {
         classificationApi: { classifications, CLASSIFICATION_QUERY_KEY },
         statusApi: { status, STATUS_COURIER_QUERY_KEY },
         attachmentsApi: { attachements, ATTACHMENTS_QUERY_KEYS },
+        selectionChanged
     }
 }

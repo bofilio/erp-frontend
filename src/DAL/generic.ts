@@ -6,6 +6,7 @@ import { EmailBodyType, endPointType, IApis } from "./types";
 export function getHeaders() {
     const user_str = localStorage.getItem(USER_KEY)
     const cuurentUser: userType = user_str !== null ? JSON.parse(user_str) : null
+    
     if (cuurentUser !== null)
         return {
             "Authorization": `JWT ${cuurentUser.token}`
@@ -14,6 +15,7 @@ export function getHeaders() {
 
 
 export class Apis implements IApis {
+
     async login(endpoint: endPointType): Promise<AxiosResponse<any, any>> {
         const { methode, url, data } = endpoint
         if (methode !== "POST")
@@ -27,8 +29,8 @@ export class Apis implements IApis {
             throw new Error(
                 JSON.stringify(
                     {
-                        data: err.response.data,
-                        status: err.response.status
+                        data: err.response?.data,
+                        status: err.response?.status
                     }
                 ));
         }
@@ -46,8 +48,8 @@ export class Apis implements IApis {
             throw new Error(
                 JSON.stringify(
                     {
-                        data: err.response.data,
-                        status: err.response.status
+                        data: err.response?.data,
+                        status: err.response?.status
                     }
                 ));
         }
@@ -65,8 +67,8 @@ export class Apis implements IApis {
             throw new Error(
                 JSON.stringify(
                     {
-                        data: err.response.data,
-                        status: err.response.status
+                        data: err.response?.data,
+                        status: err.response?.status
                     }
                 ));
         }
@@ -84,8 +86,8 @@ export class Apis implements IApis {
             throw new Error(
                 JSON.stringify(
                     {
-                        data: err.response.data,
-                        status: err.response.status
+                        data: err.response?.data,
+                        status: err.response?.status
                     }
                 ));
         }
@@ -105,8 +107,8 @@ export class Apis implements IApis {
             throw new Error(
                 JSON.stringify(
                     {
-                        data: err.response.data,
-                        status: err.response.status
+                        data: err.response?.data,
+                        status: err.response?.status
                     }
                 ));
         }
@@ -124,8 +126,8 @@ export class Apis implements IApis {
             throw new Error(
                 JSON.stringify(
                     {
-                        data: err.response.data,
-                        status: err.response.status
+                        data: err.response?.data,
+                        status: err.response?.status
                     }
                 ));
         }
@@ -144,8 +146,8 @@ export class Apis implements IApis {
             throw new Error(
                 JSON.stringify(
                     {
-                        data: err.response.data,
-                        status: err.response.status
+                        data: err.response?.data,
+                        status: err.response?.status
                     }
                 ));
         }
@@ -164,8 +166,8 @@ export class Apis implements IApis {
             throw new Error(
                 JSON.stringify(
                     {
-                        data: err.response.data,
-                        status: err.response.status
+                        data: err.response?.data,
+                        status: err.response?.status
                     }
                 ));
         }
@@ -183,8 +185,8 @@ export class Apis implements IApis {
             throw new Error(
                 JSON.stringify(
                     {
-                        data: err.response.data,
-                        status: err.response.status
+                        data: err.response?.data,
+                        status: err.response?.status
                     }
                 ));
         }
@@ -199,8 +201,8 @@ export class Apis implements IApis {
             throw new Error(
                 JSON.stringify(
                     {
-                        data: err.response.data,
-                        status: err.response.status
+                        data: err.response?.data,
+                        status: err.response?.status
                     }
                 ));
         }

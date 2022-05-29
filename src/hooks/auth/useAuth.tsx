@@ -43,7 +43,7 @@ export const useAuth = () => {
             case "LOGOUT":
                 setCurrentUser(null)
                 setAuthState({ isLoading: false, data: null, error: null })
-                typeof(window)!=="undefined" && localStorage.removeItem(USER_KEY) 
+                if(typeof(window)!=="undefined") localStorage.removeItem(USER_KEY) 
                 break;
             default: return
         }

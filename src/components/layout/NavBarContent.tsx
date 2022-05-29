@@ -33,7 +33,7 @@ export const NavBarContent = ({ handleDrawerToggle }: any) => {
             <Stack spacing={2} direction="row" alignItems="center">
                 <Box
                     component="form"
-                    sx={{ p: '2px', display: 'flex', alignItems: 'center', width: 400, backgroundColor: "#414e5c", borderRadius: 1 }}
+                    sx={{ p: '2px', display: 'flex', alignItems: 'center', width: 250, backgroundColor: "#414e5c", borderRadius: 1 }}
                 >
                     <InputBase
                         sx={{ ml: 1, flex: 1, color: "white" }}

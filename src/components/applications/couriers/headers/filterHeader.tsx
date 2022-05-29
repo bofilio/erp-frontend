@@ -14,7 +14,7 @@ export const FilterHeader:React.FC<filterHeaderProps> = (props) => {
                 component="form"
                 sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: "100%" }}
             >
-                <Box sx={{ width: 400, display: "flex", justifyContent: "space-between" }}>
+                <Box sx={{ width: '100%', display: "flex", justifyContent: "space-between" }}>
                     <InputBase
                         sx={{ ml: 1, flex: 1,  }}
                         placeholder="Recherche par: objet, type, N°enr ou ref_exp"

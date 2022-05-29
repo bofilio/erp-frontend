@@ -1,6 +1,6 @@
 
 import { useRouter } from 'next/router';
-import React, { createContext, FC, useEffect, useMemo, useState } from 'react'
+import React, { createContext, FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { useQuery } from 'react-query';
 import { auth_routes } from '../components/applications/auth/routes';
 import { API } from '../DAL/generic';
@@ -40,12 +40,14 @@ export const AuthProvider: FC<{}> = ({ children }) => {
         { currentUser, setCurrentUser })
         , [currentUser])
 
-    const { isLoading, error, data: profile } = useQuery<boolean, Error, userProfile>("userProfile", () => API.getMe({ methode: "GET" }), { retry: false, enabled: currentUser !== null })
+    const { isLoading, error, data: profile,refetch } = useQuery<boolean, Error, userProfile>("userProfile", () => API.getMe({ methode: "GET" }), { retry: false, enabled: currentUser !== null })
 
     function getCurrentUser() {
         if (typeof (window) !== "undefined") {
             const saved_current_user = localStorage.getItem(USER_KEY)
-            if (saved_current_user != null) {
+            console.log("================="+saved_current_user);
+
+            if (saved_current_user) {
                 return JSON.parse(saved_current_user) as CurrentUser
             }
         }
@@ -53,15 +55,21 @@ export const AuthProvider: FC<{}> = ({ children }) => {
     }
 
     console.log(currentUser);
-    
+    useEffect(() => {
+        if(currentUser === null) router.push(auth_routes.login)
+        else{
+            localStorage.setItem(USER_KEY, JSON.stringify(currentUser))
+        }
+
+    }, [currentUser])
 
     useEffect(() => {
-        console.log(currentUser);
-        if ( !currentUser?.profile) {
-            setCurrentUser(currentUser => ({ ...currentUser, profile:profile } as CurrentUser))
-            localStorage.setItem(USER_KEY, JSON.stringify({ ...currentUser, profile:profile }))
+        refetch()
+        if (profile && !(currentUser?.profile)) {
+            setCurrentUser(currentUser => ({ ...currentUser, profile: profile } as CurrentUser))
+            localStorage.setItem(USER_KEY, JSON.stringify({ ...currentUser, profile: profile }))
         }
-    }, [profile])
+    }, [profile,currentUser])
 
     return (
         <AuthContext.Provider value={contextValue}>

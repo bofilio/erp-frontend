@@ -16,11 +16,20 @@ export const dataUrlToFile = async (dataUrl: string, fileName: string): Promise<
     return new File([blob], fileName, { type: 'image/png' });
 }
 
-export function getRondomString(length:number){
+export function getRondomString(length: number) {
     return Math.random().toString(36).slice(2, length);
 }
 
-export function parseErrorString(raw_error:string):string{
-    if(!raw_error) return ""
-    return JSON.parse(raw_error)?.data?.detail || "???"
+export function parseErrorString(raw_error: string): string {
+    if (!raw_error) return ""
+    console.log("error="+raw_error);
+    const error_obj=JSON.parse(raw_error);
+    const data=error_obj?.data
+    if (data) return data.detail as string 
+    return "un kown error"
+}
+
+export function round(value: number, offset: number) {
+    const base = Math.pow(10, offset)
+    return Math.round(value * base) / base
 }
